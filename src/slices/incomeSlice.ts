@@ -1,13 +1,13 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Income } from "../types";
+import { IIncome } from "../types";
 
-const initialState: Income[] = [];
+const initialState: IIncome[] = [];
 
 const incomeSlice = createSlice({
   name: "income",
   initialState,
   reducers: {
-    addIncome(state, action: PayloadAction<Income>) {
+    addIncome(state, action: PayloadAction<IIncome>) {
       state.push(action.payload);
     },
   },

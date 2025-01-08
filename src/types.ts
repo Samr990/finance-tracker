@@ -1,21 +1,21 @@
-export interface Income {
+export interface IIncome {
   id: string;
   source: string;
   amount: number;
 }
 
-export interface Expense {
+export interface IExpense {
   id: string;
   category: string;
   amount: number;
 }
 
-export interface Budget {
+export interface IBudget {
   category: string;
   amount: number;
 }
 
-export interface Savings {
+export interface ISavings {
   total: number;
   goal: string;
 }
