@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { useAppDispatch, useAppSelector } from "../hooks/hooks";
-import { addExpense } from "../slices/expenseSlice";
-import { IExpense } from "../types";
+import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
+import { addExpense } from "../../slices/expenseSlice";
+import { IExpense } from "../../types";
+import "./Expense.css";
 
 const Expenses: React.FC = () => {
   const [category, setCategory] = useState("");
@@ -11,7 +12,6 @@ const Expenses: React.FC = () => {
   const expenses: IExpense[] = useAppSelector(
     (state: { expense: IExpense[] }) => state.expense
   );
-
   const handleAddExpense = () => {
     const newExpense: IExpense = {
       id: Date.now().toString(),
@@ -20,11 +20,11 @@ const Expenses: React.FC = () => {
     };
     dispatch(addExpense(newExpense));
     setCategory("");
-    setAmount(0);
+    setAmount(() => 0);
   };
 
   return (
-    <div>
+    <div className="expenses">
       <h2>Expenses</h2>
       <ul>
         {expenses.map((expense) => (
@@ -45,7 +45,9 @@ const Expenses: React.FC = () => {
         value={amount}
         onChange={(e) => setAmount(Number(e.target.value))}
       />
-      <button onClick={handleAddExpense}>Add Expense</button>
+      <button className="button" onClick={handleAddExpense}>
+        Add Expense
+      </button>
     </div>
   );
 };

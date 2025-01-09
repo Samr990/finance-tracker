@@ -1,0 +1,7 @@
+.nav {
+  background-color: rgb(33, 92, 154);
+  color: white;
+  display: flex;
+  justify-content: space-evenly;
+  padding: 10px;
+}

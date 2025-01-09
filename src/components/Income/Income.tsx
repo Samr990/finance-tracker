@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { useAppDispatch, useAppSelector } from "../hooks/hooks";
-import { addIncome } from "../slices/incomeSlice";
-import { IIncome } from "../types";
+import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
+import { addIncome } from "../../slices/incomeSlice";
+import { IIncome } from "../../types";
+import "./Income.css";
 
 const Income: React.FC = () => {
   const [source, setSource] = useState("");
@@ -43,7 +44,9 @@ const Income: React.FC = () => {
         value={amount}
         onChange={(e) => setAmount(Number(e.target.value))}
       />
-      <button onClick={handleAddIncome}>Add Income</button>
+      <button className="income-bt" onClick={handleAddIncome}>
+        Add Income
+      </button>
     </div>
   );
 };

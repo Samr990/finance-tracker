@@ -1,15 +1,11 @@
-import React from "react";
-import Income from "./components/Income";
-import Expenses from "./components/Expense";
+import RoutingNavigation from "./routes/routes";
 
-const App: React.FC = () => {
+function App() {
   return (
     <div>
-      <h1>Finance Tracker</h1>
-      <Income />
-      <Expenses />
+      <RoutingNavigation />
     </div>
   );
-};
+}
 
 export default App;
