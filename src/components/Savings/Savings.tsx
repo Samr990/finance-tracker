@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
-import { addSavings } from "../../slices/savingsSlice";
+import { addSavings, setSavingsGoal } from "../../slices/savingsSlice";
 import { ISavings } from "../../types";
 import { Pie, Bar } from "react-chartjs-2";
 import {
@@ -12,7 +12,7 @@ import {
   LinearScale,
   BarElement,
 } from "chart.js";
-import "./Savings.css";
+import "./savings.css"; // Import the CSS module
 
 // Register Chart.js components
 ChartJS.register(
@@ -26,29 +26,30 @@ ChartJS.register(
 
 const Savings: React.FC = () => {
   const [savingsData, setSavingsData] = useState<{ [key: string]: string }>({});
-  const [savingsGoals, setSavingsGoals] = useState<{ [key: string]: string }>(
-    {}
-  );
+  const [newGoal, setNewGoal] = useState<string>("");
 
   const dispatch = useAppDispatch();
   const incomes = useAppSelector((state) => state.income);
-  const savings = useAppSelector((state) => state.savings);
+  const { savings, savingsGoal } = useAppSelector((state) => state.savings);
 
+  // Helper function to calculate total savings per category
+  const getTotalSavingsForCategory = (category: string) => {
+    return savings
+      .filter((saving) => saving.category === category)
+      .reduce((sum, curr) => sum + curr.amount, 0);
+  };
+
+  // Handle saving data changes
   const handleSavingsChange = (category: string, value: string) => {
     setSavingsData((prev) => ({ ...prev, [category]: value }));
   };
 
-  const handleGoalChange = (category: string, value: string) => {
-    setSavingsGoals((prev) => ({ ...prev, [category]: value }));
-  };
-
+  // Handle adding savings
   const handleAddSavings = (category: string) => {
     const amount = parseFloat(savingsData[category]);
     const incomeAmount =
       incomes.find((income) => income.source === category)?.amount || 0;
-    const currentSavings = savings
-      .filter((saving) => saving.category === category)
-      .reduce((sum, curr) => sum + curr.amount, 0);
+    const currentSavings = getTotalSavingsForCategory(category);
 
     if (!amount || amount + currentSavings > incomeAmount) return;
 
@@ -61,35 +62,26 @@ const Savings: React.FC = () => {
     setSavingsData((prev) => ({ ...prev, [category]: "" }));
   };
 
-  const getSavingsPercentage = (category: string) => {
-    const totalIncome =
-      incomes.find((income) => income.source === category)?.amount || 0;
-    const totalSavings = savings
-      .filter((saving) => saving.category === category)
-      .reduce((sum, curr) => sum + curr.amount, 0);
-    return ((totalSavings / totalIncome) * 100).toFixed(2);
-  };
-
-  const getGoalPercentage = (category: string) => {
-    const totalIncome =
-      incomes.find((income) => income.source === category)?.amount || 0;
-    const goal = parseFloat(savingsGoals[category]) || 0;
-    return ((goal / totalIncome) * 100).toFixed(2);
+  // Calculate savings percentage
+  const getSavingsPercentage = () => {
+    const goalAmount = parseFloat(savingsGoal);
+    const totalSavings = savings.reduce((sum, curr) => sum + curr.amount, 0);
+    return ((totalSavings / goalAmount) * 100).toFixed(2);
   };
 
   // Prepare data for the Pie Chart
-  const savingsCategories = [
-    ...new Set(savings.map((saving) => saving.category)),
-  ];
+  const savingsCategories = useMemo(
+    () => [...new Set(savings.map((saving) => saving.category))],
+    [savings]
+  );
+
   const pieChartData = {
     labels: savingsCategories,
     datasets: [
       {
         label: "Savings Distribution",
         data: savingsCategories.map((category) =>
-          savings
-            .filter((saving) => saving.category === category)
-            .reduce((sum, curr) => sum + curr.amount, 0)
+          getTotalSavingsForCategory(category)
         ),
         backgroundColor: [
           "#FF6384",
@@ -116,61 +108,87 @@ const Savings: React.FC = () => {
       {
         label: "Savings",
         data: incomes.map((income) =>
-          savings
-            .filter((saving) => saving.category === income.source)
-            .reduce((sum, curr) => sum + curr.amount, 0)
+          getTotalSavingsForCategory(income.source)
         ),
         backgroundColor: "#FF6384",
       },
     ],
   };
 
+  // Handle savings goal change
+  const handleGoalChange = (value: string) => {
+    setNewGoal(value);
+  };
+
+  // Save savings goal to the Redux store
+  const handleSaveGoal = () => {
+    if (newGoal) {
+      dispatch(setSavingsGoal(newGoal)); // Save goal to the store
+      setNewGoal(""); // Clear the input field after saving
+    }
+  };
+
   return (
     <div className="savings-container">
-      <h2>Savings</h2>
+      <h2>Savings & Goals</h2>
+
+      {/* Savings Goal Input */}
+      <div className="savings-goal">
+        <input
+          type="number"
+          placeholder="Enter Savings Goal"
+          value={newGoal}
+          onChange={(e) => handleGoalChange(e.target.value)}
+        />
+        <button onClick={handleSaveGoal}>Set Savings Goal</button>
+      </div>
+
+      {/* Display the current savings goal amount */}
+      {savingsGoal && (
+        <div className="current-savings-goal">
+          <strong>Current Savings Goal: </strong>$
+          {parseFloat(savingsGoal).toFixed(2)}
+        </div>
+      )}
+
+      {/* Goal Percentage */}
+      {savingsGoal && (
+        <div>
+          <strong>Savings Goal Percentage: </strong> {getSavingsPercentage()}%
+        </div>
+      )}
+
+      {/* Savings Inputs for each income */}
       <ul>
         {incomes.map(({ id, source, amount }) => (
           <li key={id}>
-            <div>
-              {source}: Max Savings ${amount.toFixed(2)}
+            <div className="savings-category">
+              <span>{source}</span>
+              <span>Savings ${amount.toFixed(2)}</span>
             </div>
             <input
               type="number"
-              placeholder="Enter Savings"
+              placeholder="Enter an amount"
               value={savingsData[source] || ""}
               onChange={(e) => handleSavingsChange(source, e.target.value)}
             />
             <button
-              className="savings-bt"
+              className="savingsBt"
               onClick={() => handleAddSavings(source)}
               disabled={
                 !savingsData[source] ||
                 parseFloat(savingsData[source]) +
-                  savings
-                    .filter((saving) => saving.category === source)
-                    .reduce((sum, curr) => sum + curr.amount, 0) >
+                  getTotalSavingsForCategory(source) >
                   amount
               }
             >
               Add Savings
             </button>
-            <div>
-              <strong>Savings Percentage:</strong>{" "}
-              {getSavingsPercentage(source)}%
-            </div>
-            <input
-              type="number"
-              placeholder="Enter Goal"
-              value={savingsGoals[source] || ""}
-              onChange={(e) => handleGoalChange(source, e.target.value)}
-            />
-            <div>
-              <strong>Goal Percentage:</strong> {getGoalPercentage(source)}%
-            </div>
           </li>
         ))}
       </ul>
 
+      {/* Chart */}
       <div className="chart-container">
         <h3>Savings Distribution</h3>
         <Pie data={pieChartData} />

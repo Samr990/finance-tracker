@@ -1,36 +1,132 @@
+/* Savings.module.css */
+
+/* Container */
 .savings-container {
+  max-width: 1200px;
+  margin: 0 auto;
   margin-left: 200px;
-  margin-right: auto;
   padding: 20px;
-  max-width: 500px;
-  background-color: #f9f9f9;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  font-family: "Arial", sans-serif;
+  font-family: Arial, sans-serif;
 }
 
-.savings-bt {
-  background-color: #2196f3;
-  color: white;
-  padding: 10px 15px;
-  margin: 8px 0;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-  font-size: 16px;
-  font-weight: bold;
+/* Header */
+h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 20px;
   text-align: center;
-  transition: all 0.3s ease-in-out;
 }
 
-.savings-bt:hover {
-  background-color: #1976d2;
+/* Savings Goal Section */
+.savings-goal {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
 }
 
+.savings-goal input {
+  padding: 10px;
+  font-size: 1rem;
+  width: 250px;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.savings-goal button {
+  padding: 10px 15px;
+  font-size: 1rem;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.savings-goal button:hover {
+  background-color: #45a049;
+}
+
+/* Goal Percentage */
+.savings-goal-percentage {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* Savings List */
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  background-color: #f9f9f9;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.savings-category {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.savings-category span {
+  font-size: 1.1rem;
+}
+
+.savings-category .amount {
+  font-weight: bold;
+  color: #4caf50;
+}
+
+/* Savings Input */
+input[type="number"] {
+  padding: 10px;
+  font-size: 1rem;
+  width: 200px;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button.savings-bt {
+  padding: 10px 15px;
+  font-size: 1rem;
+  background-color: #ff6384;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button.savings-bt:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+button.savings-bt:hover {
+  background-color: #e04d5c;
+}
+
+/* Chart Container */
 .chart-container {
-  margin-top: 20px;
-  padding: 20px;
-  background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-top: 30px;
+  text-align: center;
+}
+
+.chart-container h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.chart-container canvas {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
 }

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
-import { addIncome } from "../../slices/incomeSlice";
+import { addIncome, removeIncome } from "../../slices/incomeSlice";
 import { IIncome } from "../../types";
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
@@ -10,38 +10,55 @@ import "./Income.css";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Income: React.FC = () => {
-  const [formData, setFormData] = useState({ source: "", amount: "" });
+  const [formData, setFormData] = useState({ amount: "", income_source: "" });
 
   const dispatch = useAppDispatch();
-  const incomes = useAppSelector((state) => state.income);
+  const { incomeItems, totalIncome } = useAppSelector((state) => state.income);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // List of fixed income sources
+  const incomeSources = [
+    "Salary",
+    "Freelance",
+    "Investment",
+    "Business",
+    "Other",
+  ];
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleAddIncome = () => {
-    if (!formData.source.trim() || !formData.amount) return;
+    if (!formData.amount || !formData.income_source) return;
 
     const newIncome: IIncome = {
       id: Date.now().toString(),
-      source: formData.source.trim(),
       amount: parseFloat(formData.amount),
+      income_source: formData.income_source,
     };
     dispatch(addIncome(newIncome));
-    setFormData({ source: "", amount: "" });
+    setFormData({ amount: "", income_source: "" });
+  };
+
+  const handleRemoveIncome = (id: string) => {
+    dispatch(removeIncome(id));
   };
 
   // Prepare data for the Pie Chart
-  const incomeSources = [...new Set(incomes.map((income) => income.source))];
+  const incomeCategories = [
+    ...new Set(incomeItems.map((income) => income.income_source)),
+  ];
   const chartData = {
-    labels: incomeSources,
+    labels: incomeCategories,
     datasets: [
       {
         label: "Income Distribution",
-        data: incomeSources.map((source) =>
-          incomes
-            .filter((income) => income.source === source)
+        data: incomeCategories.map((income_source) =>
+          incomeItems
+            .filter((income) => income.income_source === income_source)
             .reduce((sum, curr) => sum + curr.amount, 0)
         ),
         backgroundColor: [
@@ -61,19 +78,13 @@ const Income: React.FC = () => {
     <div className="income-container">
       <h2>Income</h2>
       <ul>
-        {incomes.map(({ id, source, amount }) => (
+        {incomeItems.map(({ id, amount, income_source }) => (
           <li key={id}>
-            {source}: ${amount.toFixed(2)}
+            {income_source}: ${amount.toFixed(2)}
+            <button onClick={() => handleRemoveIncome(id)}>Remove</button>
           </li>
         ))}
       </ul>
-      <input
-        type="text"
-        name="source"
-        placeholder="Source"
-        value={formData.source}
-        onChange={handleChange}
-      />
       <input
         type="number"
         name="amount"
@@ -81,13 +92,27 @@ const Income: React.FC = () => {
         value={formData.amount}
         onChange={handleChange}
       />
+      <select
+        name="income_source"
+        value={formData.income_source}
+        onChange={handleChange}
+      >
+        <option value="">Select Income Source</option>
+        {incomeSources.map((income_source) => (
+          <option key={income_source} value={income_source}>
+            {income_source}
+          </option>
+        ))}
+      </select>
       <button
         className="income-bt"
         onClick={handleAddIncome}
-        disabled={!formData.source || !formData.amount}
+        disabled={!formData.amount || !formData.income_source}
       >
         Add Income
       </button>
+
+      <h3>Total Income: ${totalIncome.toFixed(2)}</h3>
 
       <div className="chart-container">
         <h3>Income Distribution</h3>

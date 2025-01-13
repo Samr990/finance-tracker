@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
 import { addExpense } from "../../slices/expenseSlice";
 import { IExpense } from "../../types";
@@ -15,11 +15,13 @@ const Expenses: React.FC = () => {
   const dispatch = useAppDispatch();
   const expenses = useAppSelector((state) => state.expense);
 
+  // Handle form changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Handle adding a new expense
   const handleAddExpense = () => {
     if (!formData.category.trim() || !formData.amount) return;
 
@@ -32,27 +34,31 @@ const Expenses: React.FC = () => {
     setFormData({ category: "", amount: "" });
   };
 
+  // Group expenses by category and calculate totals per category
+  const expenseCategoryTotals = useMemo(() => {
+    return expenses.reduce((acc, { category, amount }) => {
+      acc[category] = (acc[category] || 0) + amount;
+      return acc;
+    }, {} as Record<string, number>);
+  }, [expenses]);
+
   // Prepare data for the Pie Chart
-  const expenseCategories = [
-    ...new Set(expenses.map((expense) => expense.category)),
-  ];
+  const expenseCategories = Object.keys(expenseCategoryTotals);
   const chartData = {
     labels: expenseCategories,
     datasets: [
       {
         label: "Expense Distribution",
-        data: expenseCategories.map((category) =>
-          expenses
-            .filter((expense) => expense.category === category)
-            .reduce((sum, curr) => sum + curr.amount, 0)
+        data: expenseCategories.map(
+          (category) => expenseCategoryTotals[category]
         ),
         backgroundColor: [
-          "#FF6384",
-          "#36A2EB",
-          "#FFCE56",
-          "#4BC0C0",
-          "#9966FF",
-          "#FF9F40",
+          "#FF5733", // red
+          "#33FF57", // green
+          "#3357FF", // blue
+          "#FF33A8", // pink
+          "#57FF33", // light green
+          "#A833FF", // purple
         ],
         borderWidth: 1,
       },
