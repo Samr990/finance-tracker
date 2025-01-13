@@ -1,0 +1,36 @@
+.savings-container {
+  margin-left: 200px;
+  margin-right: auto;
+  padding: 20px;
+  max-width: 500px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  font-family: "Arial", sans-serif;
+}
+
+.savings-bt {
+  background-color: #2196f3;
+  color: white;
+  padding: 10px 15px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  transition: all 0.3s ease-in-out;
+}
+
+.savings-bt:hover {
+  background-color: #1976d2;
+}
+
+.chart-container {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}

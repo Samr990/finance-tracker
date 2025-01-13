@@ -1,0 +1,43 @@
+.d-container {
+  margin-left: 200px;
+}
+
+.dashboard {
+  display: flex;
+  flex-wrap: wrap; /* Allows wrapping to the next line */
+  gap: 2rem; /* Adds space between the items */
+  padding: 1rem;
+  box-sizing: border-box;
+  justify-content: space-between; /* Ensures equal spacing between items */
+}
+
+.summary {
+  flex: 1 1 calc(33.33% - 2rem); /* Adjust width dynamically for responsiveness */
+  max-width: 300px; /* Optional: Sets a maximum width for each summary */
+  aspect-ratio: 1; /* Ensures the box is square */
+  height: auto; /* Allow height to adjust based on the width */
+  display: flex;
+  flex-direction: column;
+  border: 1px solid black;
+  justify-content: center;
+  align-items: center;
+  border-radius: 20px;
+}
+
+.ratio-summary {
+  width: 100%;
+  flex-grow: 1;
+  border: 1px solid black;
+}
+
+@media (max-width: 768px) {
+  .summary {
+    flex: 1 1 calc(50% - 2rem); /* Items will take up 50% of the width on medium screens */
+  }
+}
+
+@media (max-width: 480px) {
+  .summary {
+    flex: 1 1 100%; /* Items will take up 100% of the width on small screens */
+  }
+}

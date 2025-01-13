@@ -1,9 +1,10 @@
+import Dashboard from "../components/Dashboard/Dashboard";
+
 function HomePage() {
   return (
     <div>
       <div className="container">
-        <h1>Home</h1>
-        <p>Welcome to the home page</p>
+        <Dashboard />
       </div>
     </div>
   );

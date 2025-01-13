@@ -7,7 +7,7 @@ export interface IIncome {
 export interface IExpense {
   id: string;
   category: string;
-  amount: number | string;
+  amount: number;
 }
 
 export interface IBudget {
@@ -16,6 +16,7 @@ export interface IBudget {
 }
 
 export interface ISavings {
-  total: number;
-  goal: string;
+  id: string;
+  category: string;
+  amount: number;
 }

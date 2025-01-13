@@ -1,7 +1,7 @@
-.button {
-  background-color: #f44336;
+.expense-bt {
+  background-color: #f44336; /* Primary red color */
   color: white;
-  padding: 14px 20px;
+  /* padding: 14px 20px; */
   margin: 8px 0;
   border: none;
   cursor: pointer;
@@ -13,5 +13,101 @@
   text-align: center;
   text-decoration: none;
   display: inline-block;
-  transition: 0.3s;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.expense-bt:hover {
+  background-color: #d32f2f; /* Slightly darker red */
+  opacity: 1;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.expense-container {
+  margin-left: 200px;
+  margin-right: auto;
+  padding: 20px;
+  max-width: 500px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  font-family: "Arial", sans-serif;
+}
+
+.expense-container h2 {
+  text-align: center;
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.expense-container ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0 0 20px 0;
+}
+
+.expense-container li {
+  background: #ffffff;
+  border: 1px solid #ddd;
+  padding: 10px 15px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  font-size: 18px;
+  color: #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.expense-container input[type="text"],
+.expense-container input[type="number"] {
+  width: 100%;
+  padding: 12px 15px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+  font-size: 16px;
+}
+
+.expense-container input:focus {
+  border-color: #f44336;
+  outline: none;
+  box-shadow: 0 0 4px rgba(244, 67, 54, 0.3);
+}
+
+.chart-container {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.chart-container h3 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+@media (max-width: 768px) {
+  .expense-container {
+    margin: 0 auto;
+    /* margin-left: 200px; */
+    padding: 15px;
+    width: 90%;
+  }
+
+  .expense-bt {
+    font-size: 18px;
+    padding: 12px 15px;
+  }
+
+  .expense-container h2 {
+    font-size: 20px;
+  }
 }

@@ -1,21 +1,17 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ISavings } from "../types";
 
-const initialState: ISavings = {
-  total: 0,
-  goal: "",
-};
+const initialState: ISavings[] = [];
 
 const savingsSlice = createSlice({
   name: "savings",
   initialState,
   reducers: {
-    updateSavings(state, action: PayloadAction<ISavings>) {
-      state.total = action.payload.total;
-      state.goal = action.payload.goal;
+    addSavings(state, action: PayloadAction<ISavings>) {
+      state.push(action.payload);
     },
   },
 });
 
-export const { updateSavings } = savingsSlice.actions;
+export const { addSavings } = savingsSlice.actions;
 export default savingsSlice.reducer;

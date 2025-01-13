@@ -1,7 +1,42 @@
 .nav {
-  background-color: rgb(33, 92, 154);
-  color: white;
-  display: flex;
-  justify-content: space-evenly;
-  padding: 10px;
+  background-color: rgb(33, 92, 154); /* Background color */
+  color: white; /* Text color */
+  display: flex; /* Enables flexbox layout */
+  flex-direction: column; /* Stacks items vertically */
+  justify-content: flex-start; /* Align items at the top (or adjust as needed) */
+  padding: 10px; /* Spacing inside the nav */
+  position: fixed; /* Positions the nav on the left side of the screen */
+  top: 0; /* Aligns it to the top */
+  left: 0; /* Aligns it to the left */
+  height: 100%; /* Extends nav to the full height of the screen */
+  width: 200px; /* Sets the width of the nav */
+  gap: 4rem;
+}
+
+.nav .nav-item {
+  font-size: 1.5rem;
+}
+
+/* Media query for smaller screens */
+@media (max-width: 768px) {
+  .nav {
+    width: 150px; /* Make the nav bar narrower */
+    gap: 2rem; /* Reduce the spacing between nav items */
+  }
+
+  .nav .nav-item {
+    font-size: 1.2rem; /* Reduce font size for nav items */
+  }
+}
+
+/* Further adjustments for very small screens */
+@media (max-width: 480px) {
+  .nav {
+    width: 120px; /* Make the nav bar even narrower */
+    padding: 5px; /* Reduce padding */
+  }
+
+  .nav .nav-item {
+    font-size: 1rem; /* Smaller font size for nav items */
+  }
 }

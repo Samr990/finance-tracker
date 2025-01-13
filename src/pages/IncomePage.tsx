@@ -1,9 +1,10 @@
+import Income from "../components/Income/Income";
+
 function IncomePage() {
   return (
     <div>
       <div className="container">
-        <h1>Income</h1>
-        <p>Here you can add your income</p>
+        <Income />
       </div>
     </div>
   );

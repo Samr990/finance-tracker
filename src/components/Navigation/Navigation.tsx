@@ -8,9 +8,15 @@ function Navigation({ menus }: { menus: string[] }) {
       {menus.map((menu, index) => (
         <div key={index}>
           {menu === "Dashboard" ? (
-            <button onClick={() => navigate(`/`)}> {menu}</button>
+            <button className="nav-item" onClick={() => navigate(`/`)}>
+              {" "}
+              {menu}
+            </button>
           ) : (
-            <button onClick={() => navigate(`/${menu.toLowerCase()}`)}>
+            <button
+              className="nav-item"
+              onClick={() => navigate(`/${menu.toLowerCase()}`)}
+            >
               {" "}
               {menu}
             </button>
