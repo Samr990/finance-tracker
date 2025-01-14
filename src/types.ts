@@ -1,7 +1,8 @@
 export interface IIncome {
   id: string;
-  income_source: string;
   amount: number;
+  income_source: string;
+  month: string; // New property for the date of income
 }
 
 export interface IExpense {

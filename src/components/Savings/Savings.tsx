@@ -32,6 +32,17 @@ const Savings: React.FC = () => {
   const incomes = useAppSelector((state) => state.income);
   const { savings, savingsGoal } = useAppSelector((state) => state.savings);
 
+  // Predefined categories for savings
+  const categories = [
+    "Rent/Mortgage",
+    "Food & Drinks",
+    "Transportation",
+    "Bills & Utilities",
+    "Shopping",
+    "Loan Repayments",
+    "Other",
+  ];
+
   // Helper function to calculate total savings per category
   const getTotalSavingsForCategory = (category: string) => {
     return savings
@@ -48,7 +59,8 @@ const Savings: React.FC = () => {
   const handleAddSavings = (category: string) => {
     const amount = parseFloat(savingsData[category]);
     const incomeAmount =
-      incomes.find((income) => income.source === category)?.amount || 0;
+      incomes.incomeItems.find((income) => income.income_source === category)
+        ?.amount || 0;
     const currentSavings = getTotalSavingsForCategory(category);
 
     if (!amount || amount + currentSavings > incomeAmount) return;
@@ -98,17 +110,17 @@ const Savings: React.FC = () => {
 
   // Prepare data for the Bar Chart
   const barChartData = {
-    labels: incomes.map((income) => income.source),
+    labels: incomes.incomeItems.map((income) => income.income_source),
     datasets: [
       {
         label: "Income",
-        data: incomes.map((income) => income.amount),
+        data: incomes.incomeItems.map((income) => income.amount),
         backgroundColor: "#36A2EB",
       },
       {
         label: "Savings",
-        data: incomes.map((income) =>
-          getTotalSavingsForCategory(income.source)
+        data: incomes.incomeItems.map((income) =>
+          getTotalSavingsForCategory(income.income_source)
         ),
         backgroundColor: "#FF6384",
       },
@@ -146,7 +158,7 @@ const Savings: React.FC = () => {
       {/* Display the current savings goal amount */}
       {savingsGoal && (
         <div className="current-savings-goal">
-          <strong>Current Savings Goal: </strong>$
+          <strong>Current Savings Goal: </strong>${" "}
           {parseFloat(savingsGoal).toFixed(2)}
         </div>
       )}
@@ -160,25 +172,40 @@ const Savings: React.FC = () => {
 
       {/* Savings Inputs for each income */}
       <ul>
-        {incomes.map(({ id, source, amount }) => (
+        {incomes.incomeItems.map(({ id, income_source, amount }) => (
           <li key={id}>
             <div className="savings-category">
-              <span>{source}</span>
+              <span>{income_source}</span>
               <span>Savings ${amount.toFixed(2)}</span>
             </div>
+            <select
+              value={savingsData[income_source] || ""}
+              onChange={(e) =>
+                handleSavingsChange(income_source, e.target.value)
+              }
+            >
+              <option value="">Select Category</option>
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
             <input
               type="number"
               placeholder="Enter an amount"
-              value={savingsData[source] || ""}
-              onChange={(e) => handleSavingsChange(source, e.target.value)}
+              value={savingsData[income_source] || ""}
+              onChange={(e) =>
+                handleSavingsChange(income_source, e.target.value)
+              }
             />
             <button
               className="savingsBt"
-              onClick={() => handleAddSavings(source)}
+              onClick={() => handleAddSavings(income_source)}
               disabled={
-                !savingsData[source] ||
-                parseFloat(savingsData[source]) +
-                  getTotalSavingsForCategory(source) >
+                !savingsData[income_source] ||
+                parseFloat(savingsData[income_source]) +
+                  getTotalSavingsForCategory(income_source) >
                   amount
               }
             >

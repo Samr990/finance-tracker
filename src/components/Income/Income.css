@@ -25,14 +25,24 @@
 }
 
 .income-container {
+  display: flex;
   margin-left: 200px;
-  margin-right: auto;
+  gap: 10rem;
+  justify-content: space-between;
+  width: 100%;
   padding: 20px;
-  max-width: 500px;
+  padding-top: 10px;
+  box-sizing: border-box;
+}
+
+.income-list-container {
+  padding: 20px;
   background-color: #f9f9f9;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   font-family: "Arial", sans-serif;
+  max-width: 500px;
+  flex: 1;
 }
 
 .income-container h2 {
@@ -63,11 +73,11 @@
 }
 
 .income-container input[type="text"],
-.income-container input[type="number"] {
+.income-container input[type="number"],
+.income-container select {
   width: 100%;
   padding: 12px 15px;
   margin: 8px 0;
-  display: inline-block;
   border: 1px solid #ccc;
   border-radius: 5px;
   box-sizing: border-box;
@@ -80,26 +90,65 @@
   box-shadow: 0 0 4px rgba(76, 175, 80, 0.3);
 }
 
-.chart-container {
-  margin-top: 20px;
+.ichart-container {
+  display: flex;
+  flex-direction: column;
+  flex: 2;
+  gap: 20px;
+}
+
+.income-chart {
+  width: 70%;
+  height: 40%;
   padding: 20px;
   background-color: #fff;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.chart-container h3 {
+.income-chart h3 {
   text-align: center;
   margin-bottom: 20px;
   color: #333;
 }
 
+.top-right .income-chart {
+  /* Your styles here */
+  background-color: #e0f7fa; /* Example: light cyan background */
+  width: 250px;
+  height: auto;
+}
+
+.top-right {
+  display: flex;
+  justify-content: space-evenly;
+  /* gap: 2rem; */
+  /* border: 1px solid red; */
+}
+
+.income-source {
+  display: flex;
+  /* flex-wrap: wrap; */
+  gap: 1.5rem;
+  padding: 1rem;
+  width: 250px;
+  justify-content: space-evenly;
+}
+
+.income-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 6rem;
+  width: 6rem;
+  border-radius: 2rem;
+}
+
 @media (max-width: 768px) {
   .income-container {
-    margin: 0 auto;
-    margin-left: 200px;
+    flex-direction: column;
     padding: 15px;
-    width: 90%;
+    gap: 15px;
   }
 
   .income-bt {

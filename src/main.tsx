@@ -11,7 +11,7 @@ const root = ReactDOM.createRoot(
 root.render(
   <Provider store={store}>
     <div className="bg-gray-100 min-h-screen flex justify-center p-0 m-0">
-      <div className="w-full bg-white shadow-lg rounded-lg p-6">
+      <div className="w-full bg-white shadow-lg rounded-lg ">
         <App />
       </div>
     </div>

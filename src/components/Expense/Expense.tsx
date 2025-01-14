@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
-import { addExpense } from "../../slices/expenseSlice";
+import { addExpense, removeExpense } from "../../slices/expenseSlice";
 import { IExpense } from "../../types";
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
@@ -15,8 +15,21 @@ const Expenses: React.FC = () => {
   const dispatch = useAppDispatch();
   const expenses = useAppSelector((state) => state.expense);
 
+  // Predefined categories
+  const categories = [
+    "Rent/Mortgage",
+    "Food & Drinks",
+    "Transportation",
+    "Bills & Utilities",
+    "Shopping",
+    "Loan Repayments",
+    "Other",
+  ];
+
   // Handle form changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -32,6 +45,11 @@ const Expenses: React.FC = () => {
     };
     dispatch(addExpense(newExpense));
     setFormData({ category: "", amount: "" });
+  };
+
+  // Handle removing an expense by ID
+  const handleRemoveExpense = (id: string) => {
+    dispatch(removeExpense(id));
   };
 
   // Group expenses by category and calculate totals per category
@@ -72,16 +90,10 @@ const Expenses: React.FC = () => {
         {expenses.map(({ id, category, amount }) => (
           <li key={id}>
             {category}: ${amount.toFixed(2)}
+            <button onClick={() => handleRemoveExpense(id)}>Remove</button>
           </li>
         ))}
       </ul>
-      <input
-        type="text"
-        name="category"
-        placeholder="Category"
-        value={formData.category}
-        onChange={handleChange}
-      />
       <input
         type="number"
         name="amount"
@@ -89,6 +101,14 @@ const Expenses: React.FC = () => {
         value={formData.amount}
         onChange={handleChange}
       />
+      <select name="category" value={formData.category} onChange={handleChange}>
+        <option value="">Select Category</option>
+        {categories.map((category) => (
+          <option key={category} value={category}>
+            {category}
+          </option>
+        ))}
+      </select>
       <button
         className="expense-bt"
         onClick={handleAddExpense}
