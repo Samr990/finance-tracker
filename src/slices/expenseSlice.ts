@@ -1,37 +1,35 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { IExpense } from "../types";
+import { IExpense } from "../types"; // Adjust the path
 
-// Define the initial state as an array of expenses
-const initialState: IExpense[] = [];
+interface ExpenseState {
+  expenseItems: IExpense[];
+  totalExpense: number;
+}
+
+const initialState: ExpenseState = {
+  expenseItems: [],
+  totalExpense: 0,
+};
 
 const expenseSlice = createSlice({
   name: "expense",
   initialState,
   reducers: {
-    // Add a new expense to the state
-    addExpense(state, action: PayloadAction<IExpense>) {
-      state.push(action.payload);
+    addExpense: (state, action: PayloadAction<IExpense>) => {
+      state.expenseItems.push(action.payload);
+      state.totalExpense += action.payload.amount;
     },
-
-    // Remove an expense by ID
-    removeExpense(state, action: PayloadAction<string>) {
-      return state.filter((expense) => expense.id !== action.payload);
-    },
-
-    // Update an expense by ID
-    updateExpense(
-      state,
-      action: PayloadAction<{ id: string; updatedExpense: Partial<IExpense> }>
-    ) {
-      const { id, updatedExpense } = action.payload;
-      const expenseIndex = state.findIndex((expense) => expense.id === id);
-      if (expenseIndex !== -1) {
-        state[expenseIndex] = { ...state[expenseIndex], ...updatedExpense };
+    removeExpense: (state, action: PayloadAction<string>) => {
+      const index = state.expenseItems.findIndex(
+        (expense: { id: string }) => expense.id === action.payload
+      );
+      if (index !== -1) {
+        state.totalExpense -= state.expenseItems[index].amount;
+        state.expenseItems.splice(index, 1);
       }
     },
   },
 });
 
-export const { addExpense, removeExpense, updateExpense } =
-  expenseSlice.actions;
+export const { addExpense, removeExpense } = expenseSlice.actions;
 export default expenseSlice.reducer;

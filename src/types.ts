@@ -9,15 +9,22 @@ export interface IExpense {
   id: string;
   category: string;
   amount: number;
+  month: string;
 }
 
 export interface IBudget {
+  id: string;
   category: string;
   amount: number;
+  month: string;
+}
+
+export interface IBalance {
+  availableBalance: number;
 }
 
 export interface ISavings {
   id: string;
-  category: string;
   amount: number;
+  month: string;
 }

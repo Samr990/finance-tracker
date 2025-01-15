@@ -1,143 +1,130 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
 import { addSavings, setSavingsGoal } from "../../slices/savingsSlice";
-import { ISavings } from "../../types";
+import { calculateAvailableBalance } from "../../slices/balanceSlice";
 import { Pie, Bar } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  ArcElement,
-  Tooltip,
-  Legend,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-} from "chart.js";
-import "./savings.css"; // Import the CSS module
-
-// Register Chart.js components
-ChartJS.register(
-  ArcElement,
-  Tooltip,
-  Legend,
-  CategoryScale,
-  LinearScale,
-  BarElement
-);
+import { ISavings } from "../../types";
+import "./savings.css";
 
 const Savings: React.FC = () => {
-  const [savingsData, setSavingsData] = useState<{ [key: string]: string }>({});
   const [newGoal, setNewGoal] = useState<string>("");
+  const [selectedMonth, setSelectedMonth] = useState<string>("January");
+  const [savingsAmount, setSavingsAmount] = useState<string>(""); // Initialize as empty string
+  const [isSavingError, setIsSavingError] = useState<boolean>(false);
 
   const dispatch = useAppDispatch();
-  const incomes = useAppSelector((state) => state.income);
-  const { savings, savingsGoal } = useAppSelector((state) => state.savings);
+  const incomes = useAppSelector((state) => state.income.incomeItems);
+  const expenses = useAppSelector((state) => state.expense.expenseItems);
+  const savings = useAppSelector((state) => state.savings.savings);
+  const savingsGoal = useAppSelector((state) => state.savings.savingsGoal);
+  const availableBalance = useAppSelector((state) => state.balance.amount);
 
-  // Predefined categories for savings
-  const categories = [
-    "Rent/Mortgage",
-    "Food & Drinks",
-    "Transportation",
-    "Bills & Utilities",
-    "Shopping",
-    "Loan Repayments",
-    "Other",
-  ];
+  // Helper function to calculate total savings by month
+  const totalSavingsByMonth = useMemo(() => {
+    return (month: string) => {
+      return savings
+        .filter((saving) => saving.month === month)
+        .reduce((sum, curr) => sum + curr.amount, 0);
+    };
+  }, [savings]);
 
-  // Helper function to calculate total savings per category
-  const getTotalSavingsForCategory = (category: string) => {
-    return savings
-      .filter((saving) => saving.category === category)
-      .reduce((sum, curr) => sum + curr.amount, 0);
-  };
+  // Memoized available balance calculation
+  const calculateAvailableBalanceFn = useMemo(() => {
+    return () => {
+      const totalIncome = incomes
+        .filter((income) => income.month === selectedMonth)
+        .reduce((sum, curr) => sum + curr.amount, 0);
+      const totalExpenses = expenses
+        .filter((expense) => expense.month === selectedMonth)
+        .reduce((sum, curr) => sum + curr.amount, 0);
+      return totalIncome - totalExpenses - totalSavingsByMonth(selectedMonth);
+    };
+  }, [incomes, expenses, selectedMonth, totalSavingsByMonth]);
 
-  // Handle saving data changes
-  const handleSavingsChange = (category: string, value: string) => {
-    setSavingsData((prev) => ({ ...prev, [category]: value }));
-  };
+  // Pie chart data
+  const pieChartData = useMemo(() => {
+    return {
+      labels: ["Income", "Savings"],
+      datasets: [
+        {
+          data: [
+            incomes
+              .filter((income) => income.month === selectedMonth)
+              .reduce((sum, curr) => sum + curr.amount, 0),
+            totalSavingsByMonth(selectedMonth),
+          ],
+          backgroundColor: ["#36A2EB", "#FF6384"],
+          hoverBackgroundColor: ["#36A2EB", "#FF6384"],
+        },
+      ],
+    };
+  }, [incomes, selectedMonth, totalSavingsByMonth]);
+
+  // Bar chart data
+  const barChartData = useMemo(() => {
+    return {
+      labels: [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ],
+      datasets: [
+        {
+          label: "Total Savings",
+          data: Array.from({ length: 12 }, (_, index) =>
+            totalSavingsByMonth(
+              new Date(2023, index).toLocaleString("default", { month: "long" })
+            )
+          ),
+          backgroundColor: "#FF6384",
+        },
+      ],
+    };
+  }, [totalSavingsByMonth]);
 
   // Handle adding savings
-  const handleAddSavings = (category: string) => {
-    const amount = parseFloat(savingsData[category]);
-    const incomeAmount =
-      incomes.incomeItems.find((income) => income.income_source === category)
-        ?.amount || 0;
-    const currentSavings = getTotalSavingsForCategory(category);
-
-    if (!amount || amount + currentSavings > incomeAmount) return;
+  const handleAddSavings = () => {
+    const savingsValue = parseFloat(savingsAmount);
+    if (
+      isNaN(savingsValue) ||
+      savingsValue <= 0 ||
+      savingsValue > availableBalance
+    ) {
+      setIsSavingError(true);
+      return;
+    }
 
     const newSavings: ISavings = {
       id: Date.now().toString(),
-      category,
-      amount,
+      amount: savingsValue,
+      month: selectedMonth,
     };
+
     dispatch(addSavings(newSavings));
-    setSavingsData((prev) => ({ ...prev, [category]: "" }));
+    setSavingsAmount(""); // Clear input
+    setIsSavingError(false); // Reset error state
   };
 
-  // Calculate savings percentage
-  const getSavingsPercentage = () => {
-    const goalAmount = parseFloat(savingsGoal);
-    const totalSavings = savings.reduce((sum, curr) => sum + curr.amount, 0);
-    return ((totalSavings / goalAmount) * 100).toFixed(2);
-  };
-
-  // Prepare data for the Pie Chart
-  const savingsCategories = useMemo(
-    () => [...new Set(savings.map((saving) => saving.category))],
-    [savings]
-  );
-
-  const pieChartData = {
-    labels: savingsCategories,
-    datasets: [
-      {
-        label: "Savings Distribution",
-        data: savingsCategories.map((category) =>
-          getTotalSavingsForCategory(category)
-        ),
-        backgroundColor: [
-          "#FF6384",
-          "#36A2EB",
-          "#FFCE56",
-          "#4BC0C0",
-          "#9966FF",
-          "#FF9F40",
-        ],
-        borderWidth: 1,
-      },
-    ],
-  };
-
-  // Prepare data for the Bar Chart
-  const barChartData = {
-    labels: incomes.incomeItems.map((income) => income.income_source),
-    datasets: [
-      {
-        label: "Income",
-        data: incomes.incomeItems.map((income) => income.amount),
-        backgroundColor: "#36A2EB",
-      },
-      {
-        label: "Savings",
-        data: incomes.incomeItems.map((income) =>
-          getTotalSavingsForCategory(income.income_source)
-        ),
-        backgroundColor: "#FF6384",
-      },
-    ],
-  };
-
-  // Handle savings goal change
-  const handleGoalChange = (value: string) => {
-    setNewGoal(value);
-  };
-
-  // Save savings goal to the Redux store
+  // Handle saving goal
   const handleSaveGoal = () => {
     if (newGoal) {
-      dispatch(setSavingsGoal(newGoal)); // Save goal to the store
-      setNewGoal(""); // Clear the input field after saving
+      dispatch(setSavingsGoal(newGoal));
+      setNewGoal(""); // Clear input after saving
     }
+  };
+
+  // Handle month change
+  const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedMonth(e.target.value);
   };
 
   return (
@@ -150,80 +137,84 @@ const Savings: React.FC = () => {
           type="number"
           placeholder="Enter Savings Goal"
           value={newGoal}
-          onChange={(e) => handleGoalChange(e.target.value)}
+          onChange={(e) => setNewGoal(e.target.value)}
         />
         <button onClick={handleSaveGoal}>Set Savings Goal</button>
       </div>
 
-      {/* Display the current savings goal amount */}
+      {/* Display current savings goal */}
       {savingsGoal && (
         <div className="current-savings-goal">
-          <strong>Current Savings Goal: </strong>${" "}
+          <strong>Current Savings Goal: </strong>$
           {parseFloat(savingsGoal).toFixed(2)}
+          <div className="available-balance">
+            <strong>Available Balance: </strong>${availableBalance.toFixed(2)}
+          </div>
         </div>
       )}
 
-      {/* Goal Percentage */}
-      {savingsGoal && (
-        <div>
-          <strong>Savings Goal Percentage: </strong> {getSavingsPercentage()}%
-        </div>
-      )}
-
-      {/* Savings Inputs for each income */}
-      <ul>
-        {incomes.incomeItems.map(({ id, income_source, amount }) => (
-          <li key={id}>
-            <div className="savings-category">
-              <span>{income_source}</span>
-              <span>Savings ${amount.toFixed(2)}</span>
-            </div>
-            <select
-              value={savingsData[income_source] || ""}
-              onChange={(e) =>
-                handleSavingsChange(income_source, e.target.value)
-              }
-            >
-              <option value="">Select Category</option>
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-            <input
-              type="number"
-              placeholder="Enter an amount"
-              value={savingsData[income_source] || ""}
-              onChange={(e) =>
-                handleSavingsChange(income_source, e.target.value)
-              }
-            />
-            <button
-              className="savingsBt"
-              onClick={() => handleAddSavings(income_source)}
-              disabled={
-                !savingsData[income_source] ||
-                parseFloat(savingsData[income_source]) +
-                  getTotalSavingsForCategory(income_source) >
-                  amount
-              }
-            >
-              Add Savings
-            </button>
-          </li>
-        ))}
-      </ul>
-
-      {/* Chart */}
-      <div className="chart-container">
-        <h3>Savings Distribution</h3>
-        <Pie data={pieChartData} />
+      {/* Month Selection */}
+      <div className="month-selection">
+        <label>Select Month:</label>
+        <select onChange={handleMonthChange} value={selectedMonth}>
+          <option value="">Select Month</option>
+          {[
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+          ].map((month) => (
+            <option key={month} value={month}>
+              {month}
+            </option>
+          ))}
+        </select>
       </div>
 
-      <div className="chart-container">
-        <h3>Income vs Savings by Category</h3>
-        <Bar data={barChartData} options={{ responsive: true }} />
+      {/* Savings Input */}
+      {selectedMonth && (
+        <div>
+          <h3>Enter Savings Amount for {selectedMonth}</h3>
+          <input
+            className="w-100 h-12"
+            type="number"
+            value={savingsAmount}
+            placeholder="Enter an amount"
+            onChange={(e) => setSavingsAmount(e.target.value)} // Keep as string
+          />
+          <button className="bttn" onClick={handleAddSavings}>
+            Add Savings
+          </button>
+        </div>
+      )}
+
+      {/* Display Error Message */}
+      {isSavingError && (
+        <div className="error-message">
+          <span style={{ color: "red" }}>
+            Invalid savings amount or exceeds available balance.
+          </span>
+        </div>
+      )}
+
+      {/* Charts */}
+      <div className="side-by-side">
+        <div className="chart-container">
+          <h3>Income vs Savings for {selectedMonth}</h3>
+          <Pie data={pieChartData} />
+        </div>
+        <div className="chart-container">
+          <h3>Income and Savings by Month</h3>
+          <Bar data={barChartData} />
+        </div>
       </div>
     </div>
   );

@@ -2,31 +2,63 @@ import React, { useState, useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
 import { addExpense, removeExpense } from "../../slices/expenseSlice";
 import { IExpense } from "../../types";
-import { Pie } from "react-chartjs-2";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import { Pie, Bar } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+} from "chart.js";
 import "./Expense.css";
 
-// Register Chart.js components
-ChartJS.register(ArcElement, Tooltip, Legend);
+ChartJS.register(
+  ArcElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement
+);
 
-const Expenses: React.FC = () => {
-  const [formData, setFormData] = useState({ category: "", amount: "" });
+const Expense: React.FC = () => {
+  const [formData, setFormData] = useState({
+    amount: "",
+    category: "",
+  });
+  const [selectedMonth, setSelectedMonth] = useState<string>("January");
 
   const dispatch = useAppDispatch();
-  const expenses = useAppSelector((state) => state.expense);
+  const { expenseItems, totalExpense } = useAppSelector(
+    (state) => state.expense
+  );
 
-  // Predefined categories
-  const categories = [
-    "Rent/Mortgage",
+  const expenseCategories = [
     "Food & Drinks",
-    "Transportation",
-    "Bills & Utilities",
-    "Shopping",
-    "Loan Repayments",
+    "Transport",
+    "Rent",
+    "Utilities",
+    "Entertainment",
     "Other",
   ];
 
-  // Handle form changes
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -34,95 +66,196 @@ const Expenses: React.FC = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle adding a new expense
   const handleAddExpense = () => {
-    if (!formData.category.trim() || !formData.amount) return;
+    if (!formData.amount || !formData.category) return;
 
     const newExpense: IExpense = {
       id: Date.now().toString(),
-      category: formData.category.trim(),
+      category: formData.category,
       amount: parseFloat(formData.amount),
+      month: selectedMonth,
     };
+
     dispatch(addExpense(newExpense));
-    setFormData({ category: "", amount: "" });
+    setFormData({ amount: "", category: "" });
   };
 
-  // Handle removing an expense by ID
   const handleRemoveExpense = (id: string) => {
     dispatch(removeExpense(id));
   };
 
-  // Group expenses by category and calculate totals per category
-  const expenseCategoryTotals = useMemo(() => {
-    return expenses.reduce((acc, { category, amount }) => {
-      acc[category] = (acc[category] || 0) + amount;
-      return acc;
-    }, {} as Record<string, number>);
-  }, [expenses]);
+  const handleMonthSelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedMonth(e.target.value);
+  };
 
-  // Prepare data for the Pie Chart
-  const expenseCategories = Object.keys(expenseCategoryTotals);
-  const chartData = {
-    labels: expenseCategories,
+  const filteredExpenseItems = useMemo(
+    () => expenseItems.filter((expense) => expense.month === selectedMonth),
+    [expenseItems, selectedMonth]
+  );
+
+  const expenseCategoriesSet = [
+    ...new Set(filteredExpenseItems.map((expense) => expense.category)),
+  ];
+
+  const pieChartData = {
+    labels: expenseCategoriesSet,
     datasets: [
       {
-        label: "Expense Distribution",
-        data: expenseCategories.map(
-          (category) => expenseCategoryTotals[category]
+        label: `Expense Distribution for ${selectedMonth}`,
+        data: expenseCategoriesSet.map((category) =>
+          filteredExpenseItems
+            .filter((expense) => expense.category === category)
+            .reduce((sum, curr) => sum + curr.amount, 0)
         ),
         backgroundColor: [
-          "#FF5733", // red
-          "#33FF57", // green
-          "#3357FF", // blue
-          "#FF33A8", // pink
-          "#57FF33", // light green
-          "#A833FF", // purple
+          "#FF6384",
+          "#36A2EB",
+          "#FFCE56",
+          "#4BC0C0",
+          "#9966FF",
+          "#FF9F40",
         ],
         borderWidth: 1,
       },
     ],
   };
 
+  const pieChartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "right" as const,
+      },
+      tooltip: {
+        callbacks: {
+          label: function (tooltipItem: any) {
+            return `${tooltipItem.label}: $${tooltipItem.raw.toFixed(2)}`;
+          },
+        },
+      },
+    },
+  };
+
+  const monthlyExpenseData = months.reduce((acc, month) => {
+    acc[month] = expenseItems
+      .filter((expense) => expense.month === month)
+      .reduce((sum, curr) => sum + curr.amount, 0);
+    return acc;
+  }, {} as Record<string, number>);
+
+  const barChartData = {
+    labels: months,
+    datasets: [
+      {
+        label: "Monthly Expenses",
+        data: months.map((month) => monthlyExpenseData[month]),
+        backgroundColor: "#FF6384",
+      },
+    ],
+  };
+
   return (
     <div className="expense-container">
-      <h2>Expenses</h2>
-      <ul>
-        {expenses.map(({ id, category, amount }) => (
-          <li key={id}>
-            {category}: ${amount.toFixed(2)}
-            <button onClick={() => handleRemoveExpense(id)}>Remove</button>
-          </li>
-        ))}
-      </ul>
-      <input
-        type="number"
-        name="amount"
-        placeholder="Amount"
-        value={formData.amount}
-        onChange={handleChange}
-      />
-      <select name="category" value={formData.category} onChange={handleChange}>
-        <option value="">Select Category</option>
-        {categories.map((category) => (
-          <option key={category} value={category}>
-            {category}
-          </option>
-        ))}
-      </select>
-      <button
-        className="expense-bt"
-        onClick={handleAddExpense}
-        disabled={!formData.category || !formData.amount}
-      >
-        Add Expense
-      </button>
+      <div className="expense-list-container">
+        <h2>Expenses</h2>
+        <div className="month-selection-container">
+          <select value={selectedMonth} onChange={handleMonthSelection}>
+            {months.map((month) => (
+              <option key={month} value={month}>
+                {month}
+              </option>
+            ))}
+          </select>
+          <select
+            name="category"
+            value={formData.category}
+            onChange={handleChange}
+          >
+            <option value="">Select Category</option>
+            {expenseCategories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+          <input
+            type="number"
+            name="amount"
+            placeholder="Amount"
+            value={formData.amount}
+            onChange={handleChange}
+          />
+          <button
+            className="expense-bt"
+            onClick={handleAddExpense}
+            disabled={!formData.amount || !formData.category}
+          >
+            Add Expense
+          </button>
+        </div>
 
-      <div className="chart-container">
-        <h3>Expense Distribution</h3>
-        <Pie data={chartData} />
+        <h3>Total Expenses: ${totalExpense.toFixed(2)}</h3>
+
+        <ul>
+          {filteredExpenseItems.map(({ id, amount, category, month }) => (
+            <li key={id}>
+              {month} - {category}: ${amount.toFixed(2)}
+              <button
+                onClick={() => handleRemoveExpense(id)}
+                className="ml-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-700 focus:outline-none"
+                aria-label="Remove"
+              >
+                ✕
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="eChart-container">
+        <div className="top-right">
+          <div className="expense-category bg-red-200">
+            {expenseCategories.map((category) => {
+              const totalForCategory = filteredExpenseItems
+                .filter((expense) => expense.category === category)
+                .reduce((sum, curr) => sum + curr.amount, 0);
+
+              return (
+                <div
+                  key={category}
+                  className={`expense-box ${
+                    category === "Food & Drinks"
+                      ? "bg-pink-200"
+                      : category === "Transport"
+                      ? "bg-blue-200"
+                      : category === "Rent"
+                      ? "bg-green-200"
+                      : category === "Utilities"
+                      ? "bg-yellow-200"
+                      : category === "Entertainment"
+                      ? "bg-purple-200"
+                      : "bg-gray-200"
+                  }`}
+                >
+                  <span>{category}</span>
+                  <span>${totalForCategory.toFixed(2)}</span>
+                </div>
+              );
+            })}
+          </div>
+          <div className="expense-chart">
+            <h3>Expense Distribution</h3>
+            <Pie data={pieChartData} options={pieChartOptions} />
+          </div>
+        </div>
+
+        <div className="ebar-graph">
+          <h3>Monthly Expenses</h3>
+          <Bar data={barChartData} options={{ responsive: true }} />
+        </div>
       </div>
     </div>
   );
 };
 
-export default Expenses;
+export default Expense;

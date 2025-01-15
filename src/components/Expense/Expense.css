@@ -25,14 +25,24 @@
 }
 
 .expense-container {
+  display: flex;
   margin-left: 200px;
-  margin-right: auto;
+  gap: 1rem; /* Adjusted gap */
+  justify-content: space-between;
+  width: 100%;
   padding: 20px;
-  max-width: 500px;
-  background-color: #f9f9f9;
+  padding-top: 10px;
+  box-sizing: border-box;
+}
+
+.expense-list-container {
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.6);
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   font-family: "Arial", sans-serif;
+  max-width: 500px;
+  flex: 1;
 }
 
 .expense-container h2 {
@@ -63,43 +73,91 @@
 }
 
 .expense-container input[type="text"],
-.expense-container input[type="number"] {
+.expense-container input[type="number"],
+.expense-container select {
   width: 100%;
   padding: 12px 15px;
   margin: 8px 0;
-  display: inline-block;
-  border: 1px solid #ccc;
   border-radius: 5px;
   box-sizing: border-box;
   font-size: 16px;
+  background-color: rgba(200, 200, 200, 0.3);
 }
 
 .expense-container input:focus {
-  border-color: #4caf50;
+  border-color: #ff0000;
   outline: none;
-  box-shadow: 0 0 4px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 0 4px rgba(255, 0, 0, 0.3);
 }
 
-.chart-container {
-  margin-top: 20px;
+/* Pie Chart */
+.eChart-container {
+  display: flex;
+  flex-direction: column;
+  flex: 2;
+  gap: 20px;
+}
+
+.expense-chart {
+  width: 70%;
   padding: 20px;
   background-color: #fff;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.chart-container h3 {
+.expense-chart h3 {
   text-align: center;
   margin-bottom: 20px;
   color: #333;
 }
 
+.top-right .expense-chart {
+  background-color: #fbe9e7;
+  width: 300px;
+}
+
+.top-right {
+  display: flex;
+  justify-content: space-evenly;
+  gap: 2rem;
+}
+
+.expense-category {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  padding: 1rem;
+  width: 300px;
+  justify-content: space-evenly;
+  border-radius: 1rem;
+}
+
+.expense-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  height: 6rem;
+  width: 7rem;
+  border-radius: 2rem;
+}
+
+/* Bar Graph */
+.ebar-graph {
+  background-color: #fbe9e7;
+  max-height: 320px;
+  padding: 2rem;
+  margin-left: 2rem;
+  margin-right: 2rem;
+  border-radius: 1rem;
+}
+
 @media (max-width: 768px) {
   .expense-container {
-    margin: 0 auto;
-    margin-left: 200px;
+    flex-direction: column;
     padding: 15px;
-    width: 90%;
+    gap: 15px;
   }
 
   .expense-bt {
