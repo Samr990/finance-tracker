@@ -3,7 +3,6 @@ import { useAppSelector } from "../../hooks/hooks"; // Assuming you're using Red
 import { selectTotalSavings } from "../../slices/savingsSlice"; // Import the selector for total savings
 import { Pie } from "react-chartjs-2"; // Import Pie chart component
 import { Chart as ChartJS, Tooltip, Legend, ArcElement } from "chart.js"; // ChartJS registration
-import "./Dashboard.css";
 
 // Register chart components
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -41,36 +40,39 @@ function Dashboard() {
   };
 
   return (
-    <div className="d-container">
-      <div className="dashboard">
-        <div className="summary">
-          <p>Income</p>
-          <p>${income.toFixed(2)}</p> {/* Display income dynamically */}
+    <div className="container mx-auto p-4 ml-52">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white shadow-md rounded-lg p-4">
+          <p className="text-lg font-semibold">Income</p>
+          <p className="text-2xl">${income.toFixed(2)}</p>{" "}
+          {/* Display income dynamically */}
         </div>
 
-        <div className="summary">
-          <p>Expense</p>
-          <p>${expense.toFixed(2)}</p> {/* Display expense dynamically */}
+        <div className="bg-white shadow-md rounded-lg p-4">
+          <p className="text-lg font-semibold">Expense</p>
+          <p className="text-2xl">${expense.toFixed(2)}</p>{" "}
+          {/* Display expense dynamically */}
         </div>
 
-        <div className="summary">
-          <p>Savings</p>
-          <p>${savings.toFixed(2)}</p> {/* Display savings dynamically */}
+        <div className="bg-white shadow-md rounded-lg p-4">
+          <p className="text-lg font-semibold">Savings</p>
+          <p className="text-2xl">${savings.toFixed(2)}</p>{" "}
+          {/* Display savings dynamically */}
         </div>
       </div>
 
-      <div className="ratio-summary">
-        <h1>Ratio</h1>
-        <p>Income vs Expense vs Savings for this month</p>
-        <div className="pie-chart-container">
+      <div className="mt-8">
+        <h1 className="text-3xl font-bold">Ratio</h1>
+        <p className="text-lg">Income vs Expense vs Savings for this month</p>
+        <div className="flex flex-col md:flex-row justify-around mt-4">
           {/* Pie Charts side by side */}
-          <div className="pie-chart">
-            <h3>Current Month</h3>
+          <div className="w-full md:w-1/2 p-4">
+            <h3 className="text-xl font-semibold">Current Month</h3>
             <Pie data={pieChartData} options={{ responsive: true }} />
           </div>
 
-          <div className="pie-chart">
-            <h3>Comparison</h3>
+          <div className="w-full md:w-1/2 p-4">
+            <h3 className="text-xl font-semibold">Comparison</h3>
             <Pie data={pieChartData2} options={{ responsive: true }} />
           </div>
         </div>

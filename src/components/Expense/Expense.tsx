@@ -2,7 +2,7 @@ import React, { useState, useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
 import { addExpense, removeExpense } from "../../slices/expenseSlice";
 import { IExpense } from "../../types";
-import { calculateAvailableBalance } from "../../slices/balanceSlice"; // Import the calculateAvailableBalance action
+import { calculateAvailableBalance } from "../../slices/balanceSlice";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -12,7 +12,6 @@ import {
   LinearScale,
   BarElement,
 } from "chart.js";
-import "./Expense.css";
 import { Bar, Pie } from "react-chartjs-2";
 
 ChartJS.register(
@@ -38,7 +37,6 @@ const Expense: React.FC = () => {
 
   const expenseCategories = [
     "Food & Drinks",
-    "Transport",
     "Rent",
     "Utilities",
     "Entertainment",
@@ -60,7 +58,6 @@ const Expense: React.FC = () => {
     "December",
   ];
 
-  // Handle expense form changes
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -68,7 +65,6 @@ const Expense: React.FC = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle adding an expense
   const handleAddExpense = () => {
     if (!formData.amount || !formData.category) return;
 
@@ -82,7 +78,6 @@ const Expense: React.FC = () => {
     dispatch(addExpense(newExpense));
     setFormData({ amount: "", category: "" });
 
-    // Recalculate available balance after adding an expense
     dispatch(
       calculateAvailableBalance({
         income: incomes,
@@ -92,12 +87,10 @@ const Expense: React.FC = () => {
     );
   };
 
-  // Handle removing an expense
   const handleRemoveExpense = (id: string) => {
     const updatedExpenses = expenseItems.filter((expense) => expense.id !== id);
     dispatch(removeExpense(id));
 
-    // Recalculate available balance after removing an expense
     dispatch(
       calculateAvailableBalance({
         income: incomes,
@@ -107,7 +100,6 @@ const Expense: React.FC = () => {
     );
   };
 
-  // Handle month selection
   const handleMonthSelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedMonth(e.target.value);
   };
@@ -117,10 +109,8 @@ const Expense: React.FC = () => {
     [expenseItems, selectedMonth]
   );
 
-  // Available balance from the Redux store
   const availableBalance = useAppSelector((state) => state.balance.amount);
 
-  // Pie chart data for expenses
   const expenseCategoriesSet = [
     ...new Set(filteredExpenseItems.map((expense) => expense.category)),
   ];
@@ -137,7 +127,6 @@ const Expense: React.FC = () => {
         ),
         backgroundColor: [
           "#FF6384",
-          "#36A2EB",
           "#FFCE56",
           "#4BC0C0",
           "#9966FF",
@@ -182,12 +171,43 @@ const Expense: React.FC = () => {
     ],
   };
 
+  const renderExpenseCategoryBox = (category: string) => {
+    const totalForCategory = filteredExpenseItems
+      .filter((expense) => expense.category === category)
+      .reduce((sum, curr) => sum + curr.amount, 0);
+
+    const boxColor =
+      {
+        "Food & Drinks": "bg-pink-200",
+        Rent: "bg-green-200",
+        Utilities: "bg-yellow-200",
+        Entertainment: "bg-purple-200",
+        Other: "bg-gray-200",
+      }[category] || "bg-gray-200";
+
+    return (
+      <div
+        key={category}
+        className={`flex flex-col justify-center items-center h-24 w-28 rounded-lg transition-all duration-300 ease-in-out hover:translate-y-[-3px] ${boxColor}`}
+      >
+        <span className="font-bold text-gray-800">{category}</span>
+        <span className="text-lg text-green-600">
+          ${totalForCategory.toFixed(2)}
+        </span>
+      </div>
+    );
+  };
+
   return (
-    <div className="expense-container">
-      <div className="expense-list-container">
-        <h2>Expenses</h2>
+    <div className="flex ml-52 gap-4 justify-between w-full p-5 pt-2.5 box-border">
+      <div className="p-5 bg-white/90 rounded-lg font-sans max-w-lg flex-1 min-w-[300px]">
+        <h2 className="text-center text-2xl text-gray-800 mb-5">Expenses</h2>
         <div className="month-selection-container">
-          <select value={selectedMonth} onChange={handleMonthSelection}>
+          <select
+            value={selectedMonth}
+            onChange={handleMonthSelection}
+            className="w-full p-3 mb-2 rounded bg-gray-200/30"
+          >
             {months.map((month) => (
               <option key={month} value={month}>
                 {month}
@@ -198,6 +218,7 @@ const Expense: React.FC = () => {
             name="category"
             value={formData.category}
             onChange={handleChange}
+            className="w-full p-3 mb-2 rounded bg-gray-200/30"
           >
             <option value="">Select Category</option>
             {expenseCategories.map((category) => (
@@ -212,9 +233,10 @@ const Expense: React.FC = () => {
             placeholder="Amount"
             value={formData.amount}
             onChange={handleChange}
+            className="w-full p-3 mb-2 rounded bg-gray-200/30"
           />
           <button
-            className="expense-bt"
+            className="bg-red-500 text-white py-3 px-5 my-2 border-none cursor-pointer w-full opacity-90 rounded text-lg font-bold text-center transition-all duration-300 ease-in-out hover:bg-red-600 hover:opacity-100 hover:translate-y-[-2px]"
             onClick={handleAddExpense}
             disabled={!formData.amount || !formData.category}
           >
@@ -222,70 +244,54 @@ const Expense: React.FC = () => {
           </button>
         </div>
 
-        <h3>
+        <h3 className="text-xl text-gray-800 mb-5">
           Total Expenses: $
           {filteredExpenseItems
             .reduce((sum, curr) => sum + curr.amount, 0)
             .toFixed(2)}
         </h3>
 
-        <h3>Available Balance: ${availableBalance.toFixed(2)}</h3>
+        <h3 className="text-xl text-gray-800 mb-2">
+          Available Balance: ${availableBalance.toFixed(2)}
+        </h3>
 
-        <ul>
-          {filteredExpenseItems.map(({ id, amount, category, month }) => (
-            <li key={id}>
-              {month} - {category}: ${amount.toFixed(2)}
-              <button
-                onClick={() => handleRemoveExpense(id)}
-                className="ml-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-700 focus:outline-none"
-                aria-label="Remove"
+        <div className="">
+          <ul className="list-none p-0 mb-5">
+            {filteredExpenseItems.map(({ id, amount, category, month }) => (
+              <li
+                key={id}
+                className="bg-white border border-gray-300 p-3 mb-3 rounded-lg text-lg text-gray-800 flex justify-between items-center transition-all duration-300 ease-in-out hover:bg-gray-100 hover:translate-y-[-3px]"
               >
-                ✕
-              </button>
-            </li>
-          ))}
-        </ul>
+                {month} - {category}: ${amount.toFixed(2)}
+                <button
+                  onClick={() => handleRemoveExpense(id)}
+                  className="ml-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-700"
+                  aria-label="Remove"
+                >
+                  ✕
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
 
-      <div className="eChart-container">
-        <div className="top-right">
-          <div className="expense-category">
-            {expenseCategories.map((category) => {
-              const totalForCategory = filteredExpenseItems
-                .filter((expense) => expense.category === category)
-                .reduce((sum, curr) => sum + curr.amount, 0);
-
-              return (
-                <div
-                  key={category}
-                  className={`expense-box ${
-                    category === "Food & Drinks"
-                      ? "bg-pink-200"
-                      : category === "Transport"
-                      ? "bg-blue-200"
-                      : category === "Rent"
-                      ? "bg-green-200"
-                      : category === "Utilities"
-                      ? "bg-yellow-200"
-                      : category === "Entertainment"
-                      ? "bg-purple-200"
-                      : "bg-gray-200"
-                  }`}
-                >
-                  <span>{category}</span>
-                  <span>${totalForCategory.toFixed(2)}</span>
-                </div>
-              );
-            })}
+      <div className="flex flex-col flex-2 gap-5">
+        <div className="top-right flex justify-evenly gap-8">
+          <div className="flex flex-wrap gap-6 p-8 justify-evenly rounded-lg bg-pink-50">
+            {expenseCategories.map(renderExpenseCategoryBox)}
           </div>
-          <div className="expense-chart">
-            <h3>Monthly Expense Distribution</h3>
+
+          <div className="w-72 p-5 bg-pink-50 rounded-lg">
+            <h3 className="text-center mb-5 text-gray-800">
+              Monthly Expense Distribution
+            </h3>
             <Pie data={pieChartData} options={pieChartOptions} />
           </div>
         </div>
 
-        <div className="ebar-graph">
-          <h3>Monthly Expenses</h3>
+        <div className="bg-pink-50 max-h-80 p-12 mx-8 pl-24 rounded-lg">
+          <h3 className="text-center mb-5 text-gray-800">Monthly Expenses</h3>
           <Bar data={barChartData} options={{ responsive: true }} />
         </div>
       </div>
