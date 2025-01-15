@@ -29,7 +29,7 @@
   margin-left: 200px;
   gap: 1rem; /* Adjusted gap */
   justify-content: space-between;
-  width: 100%;
+  width: 85%;
   padding: 20px;
   padding-top: 10px;
   box-sizing: border-box;
@@ -37,12 +37,13 @@
 
 .expense-list-container {
   padding: 20px;
-  background-color: rgba(255, 255, 255, 0.6);
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
   font-family: "Arial", sans-serif;
   max-width: 500px;
   flex: 1;
+  min-width: 300px;
 }
 
 .expense-container h2 {
@@ -70,6 +71,7 @@
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out;
 }
 
 .expense-container input[type="text"],
@@ -99,7 +101,8 @@
 }
 
 .expense-chart {
-  width: 70%;
+  /* width: 70%; */
+  width: 300px;
   padding: 20px;
   background-color: #fff;
   border-radius: 10px;
@@ -126,11 +129,11 @@
 .expense-category {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.5rem;
+  gap: 1rem;
   padding: 1rem;
-  width: 300px;
   justify-content: space-evenly;
-  border-radius: 1rem;
+  border-radius: 12px;
+  background-color: #fbe9e7;
 }
 
 .expense-box {
@@ -140,7 +143,26 @@
   flex-direction: column;
   height: 6rem;
   width: 7rem;
-  border-radius: 2rem;
+  border-radius: 12px; /* Rounded corners for individual income boxes */
+  background-color: #ffffff; /* White background for each box */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Light shadow for boxes */
+  transition: all 0.3s ease-in-out;
+}
+
+.expense-box:hover {
+  transform: translateY(-3px); /* Slight lift on hover */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15); /* Enhanced hover shadow */
+}
+
+.expense-box span {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}
+
+.expense-box span:nth-child(2) {
+  font-size: 18px;
+  color: #4caf50; /* Green color for income amounts */
 }
 
 /* Bar Graph */
@@ -150,6 +172,7 @@
   padding: 2rem;
   margin-left: 2rem;
   margin-right: 2rem;
+  margin-bottom: 2rem;
   border-radius: 1rem;
 }
 

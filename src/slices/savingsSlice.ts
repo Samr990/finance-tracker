@@ -1,3 +1,4 @@
+// In savingsSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ISavings } from "../types";
 
@@ -7,7 +8,7 @@ interface SavingsState {
 }
 
 const initialState: SavingsState = {
-  savingsGoal: "", // Initial savings goal is empty
+  savingsGoal: "",
   savings: [],
 };
 
@@ -23,6 +24,14 @@ const savingsSlice = createSlice({
     },
   },
 });
+
+// Selector to calculate total savings
+export const selectTotalSavings = (state: { savings: SavingsState }) => {
+  return state.savings.savings.reduce(
+    (total, savingsItem) => total + savingsItem.amount,
+    0
+  );
+};
 
 // Export actions
 export const { addSavings, setSavingsGoal } = savingsSlice.actions;

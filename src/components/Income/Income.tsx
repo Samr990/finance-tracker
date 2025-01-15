@@ -219,7 +219,6 @@ const Income: React.FC = () => {
         </div>
 
         <h3>Total Income: ${totalIncome.toFixed(2)}</h3>
-        <h3>Available Balance: ${}</h3>
 
         {/* List of income entries for the selected month */}
         <div className="income-list-container">

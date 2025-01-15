@@ -2,7 +2,7 @@ import React, { useState, useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
 import { addExpense, removeExpense } from "../../slices/expenseSlice";
 import { IExpense } from "../../types";
-import { Pie, Bar } from "react-chartjs-2";
+import { calculateAvailableBalance } from "../../slices/balanceSlice"; // Import the calculateAvailableBalance action
 import {
   Chart as ChartJS,
   ArcElement,
@@ -13,6 +13,7 @@ import {
   BarElement,
 } from "chart.js";
 import "./Expense.css";
+import { Bar, Pie } from "react-chartjs-2";
 
 ChartJS.register(
   ArcElement,
@@ -31,9 +32,9 @@ const Expense: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState<string>("January");
 
   const dispatch = useAppDispatch();
-  const { expenseItems, totalExpense } = useAppSelector(
-    (state) => state.expense
-  );
+  const { expenseItems } = useAppSelector((state) => state.expense);
+  const incomes = useAppSelector((state) => state.income.incomeItems);
+  const savings = useAppSelector((state) => state.savings.savings);
 
   const expenseCategories = [
     "Food & Drinks",
@@ -59,6 +60,7 @@ const Expense: React.FC = () => {
     "December",
   ];
 
+  // Handle expense form changes
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -66,6 +68,7 @@ const Expense: React.FC = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Handle adding an expense
   const handleAddExpense = () => {
     if (!formData.amount || !formData.category) return;
 
@@ -78,12 +81,33 @@ const Expense: React.FC = () => {
 
     dispatch(addExpense(newExpense));
     setFormData({ amount: "", category: "" });
+
+    // Recalculate available balance after adding an expense
+    dispatch(
+      calculateAvailableBalance({
+        income: incomes,
+        expenses: [...expenseItems, newExpense],
+        savings,
+      })
+    );
   };
 
+  // Handle removing an expense
   const handleRemoveExpense = (id: string) => {
+    const updatedExpenses = expenseItems.filter((expense) => expense.id !== id);
     dispatch(removeExpense(id));
+
+    // Recalculate available balance after removing an expense
+    dispatch(
+      calculateAvailableBalance({
+        income: incomes,
+        expenses: updatedExpenses,
+        savings,
+      })
+    );
   };
 
+  // Handle month selection
   const handleMonthSelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedMonth(e.target.value);
   };
@@ -93,6 +117,10 @@ const Expense: React.FC = () => {
     [expenseItems, selectedMonth]
   );
 
+  // Available balance from the Redux store
+  const availableBalance = useAppSelector((state) => state.balance.amount);
+
+  // Pie chart data for expenses
   const expenseCategoriesSet = [
     ...new Set(filteredExpenseItems.map((expense) => expense.category)),
   ];
@@ -194,7 +222,14 @@ const Expense: React.FC = () => {
           </button>
         </div>
 
-        <h3>Total Expenses: ${totalExpense.toFixed(2)}</h3>
+        <h3>
+          Total Expenses: $
+          {filteredExpenseItems
+            .reduce((sum, curr) => sum + curr.amount, 0)
+            .toFixed(2)}
+        </h3>
+
+        <h3>Available Balance: ${availableBalance.toFixed(2)}</h3>
 
         <ul>
           {filteredExpenseItems.map(({ id, amount, category, month }) => (
@@ -214,7 +249,7 @@ const Expense: React.FC = () => {
 
       <div className="eChart-container">
         <div className="top-right">
-          <div className="expense-category bg-red-200">
+          <div className="expense-category">
             {expenseCategories.map((category) => {
               const totalForCategory = filteredExpenseItems
                 .filter((expense) => expense.category === category)
@@ -244,7 +279,7 @@ const Expense: React.FC = () => {
             })}
           </div>
           <div className="expense-chart">
-            <h3>Expense Distribution</h3>
+            <h3>Monthly Expense Distribution</h3>
             <Pie data={pieChartData} options={pieChartOptions} />
           </div>
         </div>
