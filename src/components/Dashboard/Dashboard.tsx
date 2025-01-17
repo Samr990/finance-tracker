@@ -1,79 +1,200 @@
 import React from "react";
-import { useAppSelector } from "../../hooks/hooks"; // Assuming you're using Redux and a custom hook for dispatch and selector
-import { selectTotalSavings } from "../../slices/savingsSlice"; // Import the selector for total savings
-import { Pie } from "react-chartjs-2"; // Import Pie chart component
-import { Chart as ChartJS, Tooltip, Legend, ArcElement } from "chart.js"; // ChartJS registration
+import { useAppDispatch, useAppSelector } from "../../hooks/hooks"; // Custom Redux hooks
+import { Line, Pie } from "react-chartjs-2"; // Chart components
+import {
+  Chart as ChartJS,
+  Tooltip,
+  Legend,
+  ArcElement,
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+} from "chart.js";
 
-// Register chart components
-ChartJS.register(ArcElement, Tooltip, Legend);
+// Import reset actions
+import { resetData as resetIncomeData } from "../../slices/incomeSlice";
+import { resetData as resetExpenseData } from "../../slices/expenseSlice";
+import { resetData as resetSavingsData } from "../../slices/savingsSlice";
+
+// Register ChartJS components
+ChartJS.register(
+  ArcElement,
+  Tooltip,
+  Legend,
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  PointElement
+);
+
+const categoryIcons = {
+  Income: "💵", // Money bag or dollar sign for Income
+  Expense: "💸", // Money with wings for Expense
+  Savings: "🏦", // Bank for Savings
+};
 
 function Dashboard() {
-  // Access data from the Redux store
-  const income = useAppSelector((state) => state.income.totalIncome);
-  const expense = useAppSelector((state) => state.expense.totalExpense);
-  const savings = useAppSelector(selectTotalSavings); // Use the selector for total savings
+  const dispatch = useAppDispatch();
 
-  // Pie Chart Data for the current month
+  // Selectors for Redux state
+  const incomeItems = useAppSelector((state) => state.income.incomeItems);
+  const expenseItems = useAppSelector((state) => state.expense.expenseItems);
+  const savingsItems = useAppSelector((state) => state.savings.savings);
+
+  // Aggregate monthly data for income, expense, and savings
+  interface Item {
+    month: string;
+    amount: number;
+  }
+
+  const aggregateMonthlyData = (items: Item[]): number[] => {
+    const monthlyTotals: number[] = Array(12).fill(0);
+    items.forEach((item: Item) => {
+      const monthIndex: number = new Date(`${item.month}-01`).getMonth();
+      monthlyTotals[monthIndex] += item.amount;
+    });
+    return monthlyTotals;
+  };
+
+  const monthlyIncome = aggregateMonthlyData(incomeItems);
+  const monthlyExpense = aggregateMonthlyData(expenseItems);
+  const monthlySavings = aggregateMonthlyData(savingsItems);
+
+  // Pie Chart Data for Current Month
+  const currentMonth = new Date().getMonth();
   const pieChartData = {
     labels: ["Income", "Expense", "Savings"],
     datasets: [
       {
-        label: "Income, Expense, and Savings for the Current Month",
-        data: [income, expense, savings], // Replace with monthly data for the current month
+        label: "Current Month Data",
+        data: [
+          monthlyIncome[currentMonth] || 0,
+          monthlyExpense[currentMonth] || 0,
+          monthlySavings[currentMonth] || 0,
+        ],
         backgroundColor: ["#36A2EB", "#FF6384", "#FF9F40"],
-        borderWidth: 1,
       },
     ],
   };
 
-  // Example: Pie Chart Data for another set (could be a comparison or another period)
-  const pieChartData2 = {
-    labels: ["Income", "Expense", "Savings"],
+  // Line Chart Data for Monthly Comparison
+  const lineChartData = {
+    labels: [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ],
     datasets: [
       {
-        label: "Income, Expense, and Savings Comparison",
-        data: [4000, 2500, 1000], // Replace with data for another comparison
-        backgroundColor: ["#36A2EB", "#FF6384", "#FF9F40"],
-        borderWidth: 1,
+        label: "Income",
+        data: monthlyIncome,
+        borderColor: "#36A2EB",
+        fill: false,
+      },
+      {
+        label: "Expense",
+        data: monthlyExpense,
+        borderColor: "#FF6384",
+        fill: false,
+      },
+      {
+        label: "Savings",
+        data: monthlySavings,
+        borderColor: "#FF9F40",
+        fill: false,
       },
     ],
+  };
+
+  // Clear all data handler
+  const clearData = () => {
+    dispatch(resetIncomeData());
+    dispatch(resetExpenseData());
+    dispatch(resetSavingsData());
   };
 
   return (
-    <div className="container mx-auto p-4 ml-52">
+    <div className="container mx-auto pl-52 p-4">
+      <p className="mb-8">
+        NOTE: the data shown is dummy data, to clear this data click here!!
+        <button
+          onClick={clearData}
+          className="mb-4 ml-4 py-2 px-4 bg-red-500 text-white rounded-lg"
+        >
+          Clear All Data
+        </button>
+      </p>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white shadow-md rounded-lg p-4">
-          <p className="text-lg font-semibold">Income</p>
-          <p className="text-2xl">${income.toFixed(2)}</p>{" "}
-          {/* Display income dynamically */}
+        {/* Income Section */}
+        <div className="bg-blue-100 shadow-md rounded-lg p-4 flex items-center">
+          <span className="text-3xl mr-4">{categoryIcons.Income}</span>{" "}
+          <div>
+            <p className="text-lg font-semibold">Income</p>
+            <p className="text-2xl">
+              $
+              {monthlyIncome
+                .reduce((sum, income) => sum + income, 0)
+                .toFixed(2)}
+            </p>
+          </div>
         </div>
 
-        <div className="bg-white shadow-md rounded-lg p-4">
-          <p className="text-lg font-semibold">Expense</p>
-          <p className="text-2xl">${expense.toFixed(2)}</p>{" "}
-          {/* Display expense dynamically */}
+        {/* Expense Section */}
+        <div className="bg-red-100 shadow-md rounded-lg p-4 flex items-center">
+          <span className="text-3xl mr-4">{categoryIcons.Expense}</span>{" "}
+          <div>
+            <p className="text-lg font-semibold">Expense</p>
+            <p className="text-2xl">
+              $
+              {monthlyExpense
+                .reduce((sum, expense) => sum + expense, 0)
+                .toFixed(2)}
+            </p>
+          </div>
         </div>
 
-        <div className="bg-white shadow-md rounded-lg p-4">
-          <p className="text-lg font-semibold">Savings</p>
-          <p className="text-2xl">${savings.toFixed(2)}</p>{" "}
-          {/* Display savings dynamically */}
+        {/* Savings Section */}
+        <div className="bg-orange-100 shadow-md rounded-lg p-4 flex items-center">
+          <span className="text-3xl mr-4">{categoryIcons.Savings}</span>{" "}
+          <div>
+            <p className="text-lg font-semibold">Savings</p>
+            <p className="text-2xl">
+              $
+              {monthlySavings
+                .reduce((sum, savings) => sum + savings, 0)
+                .toFixed(2)}
+            </p>
+          </div>
         </div>
       </div>
 
+      {/* Pie Chart Section */}
       <div className="mt-8">
-        <h1 className="text-3xl font-bold">Ratio</h1>
-        <p className="text-lg">Income vs Expense vs Savings for this month</p>
-        <div className="flex flex-col md:flex-row justify-around mt-4">
-          {/* Pie Charts side by side */}
-          <div className="w-full md:w-1/2 p-4">
-            <h3 className="text-xl font-semibold">Current Month</h3>
+        <h1 className="text-3xl font-bold">Current Month Overview</h1>
+        <div className="flex justify-center">
+          <div className="w-1/2 max-w-xs">
             <Pie data={pieChartData} options={{ responsive: true }} />
           </div>
+        </div>
+      </div>
 
-          <div className="w-full md:w-1/2 p-4">
-            <h3 className="text-xl font-semibold">Comparison</h3>
-            <Pie data={pieChartData2} options={{ responsive: true }} />
+      {/* Line Chart Section */}
+      <div className="mt-8">
+        <h1 className="text-3xl font-bold">Monthly Comparison</h1>
+        <div className="flex justify-center">
+          <div className="w-full max-w-2xl">
+            <Line data={lineChartData} options={{ responsive: true }} />
           </div>
         </div>
       </div>

@@ -1,78 +1,161 @@
-### **Project: Personal Finance Tracker**
+# Finance Tracker
 
-### **Project Overview:**
+Finance Tracker is a web application to help you manage your savings and set financial goals.
 
-The Personal Finance Tracker project involves designing and developing a comprehensive application for tracking personal income, expenses, and savings goals. This project provides hands-on experience in building custom hooks, applying advanced React methodologies, and styling with Tailwind CSS. Participants will also leverage GitHub Copilot to enhance coding productivity and efficiency.
+## Table of Contents
 
-### **Key Features:**
+- [A Brief Overview](#Overview)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Available Scripts](#available-scripts)
+- [Custom Hooks and Advanced React Methodologies](#custom-hooks-and-advanced-react-methodologies)
+- [Contributing](#contributing)
+- [License](#license)
 
-#### **UI/UX Design:**
+## Overview
 
-- **Responsive Design:** Ensure the application is responsive and visually appealing across various devices.
-- **User-Friendly Interface:** Design intuitive and easy-to-navigate interfaces.
+This is a finance tracker App that helps the user track their income and expense. Also user can set saving goals and add contribution they make monthly to reach the said saving goal.
 
-#### **Custom Hooks:**
+1. **Dashboard:**
+   This is the home of the app. Intially it shows dummy data that is intialzied in respective slices of income, expense and savings. The user can erase this data thru the dashbord with the help of a button. It displays the user's toatl income, expense and savings. Also user can see the current months comparision and overall comparison of income, expense and savings throught the months.
 
-- **Reusability:** Create custom hooks to encapsulate and reuse logic across components.
-- **Separation of Concerns:** Ensure better separation of concerns and a cleaner codebase.
+2. **Income:**
+   Here the user can input their income based on category and by selecting a date. The user can see the monthly income distribution by category as well as transcation they have entered. There is also a bar graph that shows how much income the user has made each month.
 
-#### **Advanced React Methodologies:**
+3. **Expense:**
+   This is similar to income page except, the user can input data for expenses they make based on category. They can see their expense transactions, category comparison and monthly expense each month.
 
-- **Code Splitting:** Implement code splitting to optimize application performance.
-- **Lazy Loading:** Use React's lazy loading for components to improve initial load times.
-- **Error Boundaries:** Implement error boundaries to handle errors gracefully.
+4. **Savigns:**
+   In the savings, the user can set a saving goal and see if they have reached the said goal. Based on that the user may see a congratulatory message or a message that tells them the required amount needed to save to reach their goal. There is also a pie chart that shows income vs savings comparison for the month and a bar graph that shows the users monthly saving contribution.
 
-#### **Styling with Tailwind CSS:**
+## Installation
 
-- **Utility-First CSS:** Use Tailwind CSS for rapidly building custom designs.
-- **Responsive Utilities:** Apply Tailwind's responsive utilities for a mobile-first design approach.
+1. **Clone the Repository:**
 
-#### **GitHub Copilot Assistance:**
+   ```bash
+   git clone <repository-url>
+   ```
 
-- **Code Suggestions:** Utilize GitHub Copilot for generating code snippets and suggestions.
-- **Enhanced Productivity:** Leverage Copilot's AI capabilities to improve coding efficiency.
+   Replace `<repository-url>` with the actual URL of your repository.
 
-### **Project Structure:**
+2. **Navigate to the Project Directory:**
 
-#### **1. Setup and Initialization:**
+   ```bash
+   cd finance-tracker
+   ```
 
-- **Initialize Project:** Set up a new React project using Create React App or Vite.
-- **Install Dependencies:** Install necessary dependencies including Tailwind CSS and any other libraries.
+3. **Install Dependencies:**
 
-#### **2. UI/UX Design:**
+   ```bash
+   npm install
+   ```
 
-- **Layout Design:** Design the main layout including dashboard, income, expenses, and savings goal pages.
-- **CSS Styling:** Apply Tailwind CSS for styling the application, ensuring responsiveness.
+   or
 
-#### **3. Custom Hooks:** (optional)
+   ```bash
+   yarn install
+   ```
 
-- **Create Hooks:** Develop custom hooks for encapsulating reusable logic (e.g., `useFetchTransactions`, `useIncome`, `useExpenses`).
-- **Utilize Hooks:** Use custom hooks within components to manage state and side effects.
+4. **Set Up Environment Variables:**
+   Create a `.env` file in the root directory of your project and add any necessary environment variables. For example:
+   ```env
+   REACT_APP_API_URL=http://localhost:5000
+   ```
 
-#### **4. Advanced React Methodologies:**
+## Usage
 
-- **Code Splitting:** Implement code splitting using React's `React.lazy` and `Suspense`.
-- **Lazy Loading:** Lazy load components to improve initial load times.
-- **Error Boundaries:** Create error boundaries to catch and handle errors gracefully.
+1. **Start the Development Server:**
 
-#### **5. Key Features Implementation:**
+   ```bash
+   npm run dev
+   ```
 
-- **Income Management:** Allow users to input and categorize income sources.
-- **Expense Tracking:** Enable users to log and categorize expenses.
-- **Savings Goals:** Allow users to set and track progress towards savings goals.
-- **Financial Overview:** Provide a dashboard with a summary of income, expenses, and savings.
-- **Data Visualization:** Use charts and graphs to visualize financial data.
+   or
 
-#### **6. GitHub Copilot Assistance:**
+   ```bash
+   yarn dev
+   ```
 
-- **Code Generation:** Utilize GitHub Copilot for code suggestions and generation.
-- **Productivity Enhancements:** Implement Copilot's suggestions to enhance coding productivity.
+2. **Open the Application:**
+   Open your web browser and navigate to `http://localhost:3000` to view the application.
 
-#### **7. Documentation:**
+## Available Scripts
 
-- **README File:** Provide clear instructions for setting up and running the application.
-- **API Documentation:** Document the usage of custom hooks and advanced React methodologies.
+In the project directory, you can run:
 
-## Note:
+### `npm run dev` or `yarn dev`
 
-Please make the use of the Context API to handle the state management. A better UI can be created to get a good grasp on the UI materials covered.
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+
+The page will reload when you make changes.\
+You may also see any lint errors in the console.
+
+### `npm run build` or `yarn build`
+
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
+
+### `npm test` or `yarn test`
+
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+
+## Custom Hooks and Advanced React Methodologies
+
+### Custom Hooks
+
+This project uses custom hooks to encapsulate and reuse logic across different components. The custom hooks are located in the `src/hooks` directory.
+
+#### `useAppDispatch` and `useAppSelector`
+
+These hooks are used to interact with the Redux store.
+
+- `useAppDispatch`: A typed version of the `useDispatch` hook from `react-redux`.
+- `useAppSelector`: A typed version of the `useSelector` hook from `react-redux`.
+
+Example usage:
+
+```typescript
+import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
+
+const dispatch = useAppDispatch();
+const incomes = useAppSelector((state) => state.income.incomeItems);
+```
+
+### Advanced React Methodologies
+
+#### useMemo
+
+The `useMemo` hook is used to memoize expensive calculations and avoid unnecessary re-renders.
+
+Example usage:
+
+```typescript
+const totalSavingsByMonth = useMemo(() => {
+  return (month: string) => {
+    return savings
+      .filter((saving) => saving.month === month)
+      .reduce((sum, curr) => sum + curr.amount, 0);
+  };
+}, [savings]);
+```
+
+#### useState
+
+The `useState` hook is used to manage local state within functional components.
+
+Example usage:
+
+```typescript
+const [newGoal, setNewGoal] = useState<string>("");
+const [selectedMonth, setSelectedMonth] = useState<string>("January");
+```
+
+#### useEffect
+
+The `useEffect` hook is used to perform side effects in functional components. This project does not currently use `useEffect`, but it is a common hook for handling side effects such as data fetching and subscriptions.
+
+## Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request for any changes.

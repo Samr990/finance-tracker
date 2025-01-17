@@ -1,15 +1,13 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
 import { addSavings, setSavingsGoal } from "../../slices/savingsSlice";
-import { calculateAvailableBalance } from "../../slices/balanceSlice";
 import { Pie, Bar } from "react-chartjs-2";
 import { ISavings } from "../../types";
-import "./savings.css";
 
 const Savings: React.FC = () => {
   const [newGoal, setNewGoal] = useState<string>("");
   const [selectedMonth, setSelectedMonth] = useState<string>("January");
-  const [savingsAmount, setSavingsAmount] = useState<string>(""); // Initialize as empty string
+  const [savingsAmount, setSavingsAmount] = useState<string>("");
   const [isSavingError, setIsSavingError] = useState<boolean>(false);
 
   const dispatch = useAppDispatch();
@@ -17,9 +15,12 @@ const Savings: React.FC = () => {
   const expenses = useAppSelector((state) => state.expense.expenseItems);
   const savings = useAppSelector((state) => state.savings.savings);
   const savingsGoal = useAppSelector((state) => state.savings.savingsGoal);
-  const availableBalance = useAppSelector((state) => state.balance.amount);
 
-  // Helper function to calculate total savings by month
+  // Calculate total savings across all months
+  const totalSavings = useMemo(() => {
+    return savings.reduce((sum, curr) => sum + curr.amount, 0);
+  }, [savings]);
+
   const totalSavingsByMonth = useMemo(() => {
     return (month: string) => {
       return savings
@@ -28,7 +29,6 @@ const Savings: React.FC = () => {
     };
   }, [savings]);
 
-  // Memoized available balance calculation
   const calculateAvailableBalanceFn = useMemo(() => {
     return () => {
       const totalIncome = incomes
@@ -41,7 +41,6 @@ const Savings: React.FC = () => {
     };
   }, [incomes, expenses, selectedMonth, totalSavingsByMonth]);
 
-  // Pie chart data
   const pieChartData = useMemo(() => {
     return {
       labels: ["Income", "Savings"],
@@ -60,7 +59,6 @@ const Savings: React.FC = () => {
     };
   }, [incomes, selectedMonth, totalSavingsByMonth]);
 
-  // Bar chart data
   const barChartData = useMemo(() => {
     return {
       labels: [
@@ -91,14 +89,9 @@ const Savings: React.FC = () => {
     };
   }, [totalSavingsByMonth]);
 
-  // Handle adding savings
   const handleAddSavings = () => {
     const savingsValue = parseFloat(savingsAmount);
-    if (
-      isNaN(savingsValue) ||
-      savingsValue <= 0 ||
-      savingsValue > availableBalance
-    ) {
+    if (isNaN(savingsValue) || savingsValue <= 0) {
       setIsSavingError(true);
       return;
     }
@@ -110,53 +103,78 @@ const Savings: React.FC = () => {
     };
 
     dispatch(addSavings(newSavings));
-    setSavingsAmount(""); // Clear input
-    setIsSavingError(false); // Reset error state
+    setSavingsAmount("");
+    setIsSavingError(false);
   };
 
-  // Handle saving goal
   const handleSaveGoal = () => {
     if (newGoal) {
       dispatch(setSavingsGoal(newGoal));
-      setNewGoal(""); // Clear input after saving
+      setNewGoal("");
     }
   };
 
-  // Handle month change
   const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedMonth(e.target.value);
   };
 
   return (
-    <div className="savings-container">
-      <h2>Savings & Goals</h2>
+    <div className="ml-52 max-w-full p-5 font-sans bg-blue-50 rounded-lg shadow-md w-4/5 box-border">
+      <h2 className="text-3xl font-semibold text-center text-gray-800 mb-5 border-b-2 border-gray-200 pb-2">
+        Savings & Goals
+      </h2>
 
-      {/* Savings Goal Input */}
-      <div className="savings-goal">
+      <div className="flex justify-center mb-5">
         <input
           type="number"
           placeholder="Enter Savings Goal"
           value={newGoal}
           onChange={(e) => setNewGoal(e.target.value)}
+          className="p-3 text-base w-72 mr-3 border border-gray-300 rounded-md transition duration-300 focus:border-green-500 focus:outline-none"
         />
-        <button onClick={handleSaveGoal}>Set Savings Goal</button>
+        <button
+          onClick={handleSaveGoal}
+          className="p-3 text-base bg-green-500 text-white rounded-md cursor-pointer transition duration-300 hover:bg-green-600"
+        >
+          Set Savings Goal
+        </button>
       </div>
 
-      {/* Display current savings goal */}
       {savingsGoal && (
-        <div className="current-savings-goal">
+        <div className="text-center mb-4 text-gray-700">
           <strong>Current Savings Goal: </strong>$
           {parseFloat(savingsGoal).toFixed(2)}
-          <div className="available-balance">
-            <strong>Available Balance: </strong>${availableBalance.toFixed(2)}
+          <div className="font-normal">
+            <strong>Total Amount Saved: </strong>$
+            {savings.reduce((sum, saving) => sum + saving.amount, 0).toFixed(2)}
           </div>
+          {savings.reduce((sum, saving) => sum + saving.amount, 0) >=
+          parseFloat(savingsGoal) ? (
+            <div className="text-green-600 font-semibold mt-2">
+              🎉 Congratulations! You've reached your savings goal! 🎉
+            </div>
+          ) : (
+            <div className="text-red-600 font-semibold mt-2">
+              You need an additional $
+              {(
+                parseFloat(savingsGoal) -
+                savings.reduce((sum, saving) => sum + saving.amount, 0)
+              ).toFixed(2)}{" "}
+              to reach your goal.
+            </div>
+          )}
         </div>
       )}
 
-      {/* Month Selection */}
-      <div className="month-selection">
-        <label>Select Month:</label>
-        <select onChange={handleMonthChange} value={selectedMonth}>
+      <div className="text-center mb-5">
+        <label className="text-lg font-semibold text-gray-800 mr-2">
+          Select Month:
+        </label>
+        <select
+          onChange={handleMonthChange}
+          value={selectedMonth}
+          className="p-2 text-base w-56 border border-gray-300 rounded-md bg-white transition duration-300 focus:border-green-500 focus:outline-none"
+        >
           <option value="">Select Month</option>
           {[
             "January",
@@ -179,40 +197,46 @@ const Savings: React.FC = () => {
         </select>
       </div>
 
-      {/* Savings Input */}
       {selectedMonth && (
         <div>
-          <h3>Enter Savings Amount for {selectedMonth}</h3>
-          <input
-            className="w-100 h-12"
-            type="number"
-            value={savingsAmount}
-            placeholder="Enter an amount"
-            onChange={(e) => setSavingsAmount(e.target.value)} // Keep as string
-          />
-          <button className="bttn" onClick={handleAddSavings}>
-            Add Savings
-          </button>
+          <h3 className="text-center text-xl mb-3">
+            Enter Savings Amount for {selectedMonth}
+          </h3>
+          <div className="flex justify-center mb-5">
+            <input
+              type="number"
+              value={savingsAmount}
+              placeholder="Enter an amount"
+              onChange={(e) => setSavingsAmount(e.target.value)}
+              className="p-3 text-base w-64 mr-3 border border-gray-300 rounded-md transition duration-300 focus:border-pink-500 focus:outline-none"
+            />
+            <button
+              onClick={handleAddSavings}
+              className="p-3 text-base bg-pink-500 text-white rounded-md cursor-pointer transition duration-300 hover:bg-pink-600"
+            >
+              Add Savings
+            </button>
+          </div>
         </div>
       )}
 
-      {/* Display Error Message */}
       {isSavingError && (
-        <div className="error-message">
-          <span style={{ color: "red" }}>
-            Invalid savings amount or exceeds available balance.
-          </span>
+        <div className="text-center text-red-600 font-semibold mb-3">
+          Invalid savings amount.
         </div>
       )}
 
-      {/* Charts */}
-      <div className="side-by-side">
-        <div className="chart-container">
-          <h3>Income vs Savings for {selectedMonth}</h3>
+      <div className="flex justify-between my-12 p-6 gap-8">
+        <div className="bg-white rounded-lg p-5 shadow-md w-2/5">
+          <h3 className="text-center text-lg mb-4 text-gray-800">
+            Income vs Savings for {selectedMonth}
+          </h3>
           <Pie data={pieChartData} />
         </div>
-        <div className="chart-container">
-          <h3>Income and Savings by Month</h3>
+        <div className="bg-white rounded-lg p-5 shadow-md w-3/5">
+          <h3 className="text-center text-lg mb-4 text-gray-800">
+            Monthly Saving Contribution
+          </h3>
           <Bar data={barChartData} />
         </div>
       </div>

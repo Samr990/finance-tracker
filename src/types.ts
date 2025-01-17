@@ -3,6 +3,7 @@ export interface IIncome {
   amount: number;
   income_source: string;
   month: string; // New property for the date of income
+  date: string;
 }
 
 export interface IExpense {
@@ -10,6 +11,7 @@ export interface IExpense {
   category: string;
   amount: number;
   month: string;
+  date: string;
 }
 
 export interface IBudget {
