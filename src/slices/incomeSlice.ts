@@ -6,12 +6,19 @@ interface IncomeState {
   totalIncome: number;
 }
 
+const incomeSources = [
+  "Salary",
+  "Freelance",
+  "Investment",
+  "Business",
+  "Other",
+];
+
 const initialState: IncomeState = {
   incomeItems: generateRandomIncomeData(),
   totalIncome: 0,
 };
 
-// Function to generate random income data for each month
 function generateRandomIncomeData(): IIncome[] {
   const months = [
     "January",
@@ -29,13 +36,15 @@ function generateRandomIncomeData(): IIncome[] {
   ];
 
   return months.map((month, index) => {
-    const randomAmount = parseFloat((Math.random() * 1000 + 500).toFixed(2)); // Random value between 500 and 1500
+    const randomAmount = parseFloat((Math.random() * 1000 + 500).toFixed(2));
+    const randomSource =
+      incomeSources[Math.floor(Math.random() * incomeSources.length)];
     return {
-      id: `income-${index + 1}`, // Generate a unique ID for each income
+      id: `income-${index + 1}`,
       month: month,
       amount: randomAmount,
-      income_source: "Random Source", // Add a default income source
-      date: new Date().toISOString(), // Add the current date
+      income_source: randomSource,
+      date: new Date().toISOString(),
     };
   });
 }
@@ -71,20 +80,16 @@ const incomeSlice = createSlice({
         (income) => income.id === id
       );
       if (incomeToUpdate) {
-        // Update only the changed fields
         Object.assign(incomeToUpdate, updatedIncome);
-
-        // Recalculate totalIncome after update
         state.totalIncome = state.incomeItems.reduce(
           (sum, income) => sum + income.amount,
           0
         );
       }
     },
-    // New reset action to clear all data
     resetData(state) {
-      state.incomeItems = []; // Clear income items
-      state.totalIncome = 0; // Reset total income to 0
+      state.incomeItems = [];
+      state.totalIncome = 0;
     },
   },
 });
